@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LEAP Project — Lower Extremity Apophyseal Pain in Youth Athletes</title>
+  <meta name="description" content="LEAP is a multidomain research program investigating lower-extremity apophyseal pain in youth athletes, including Osgood–Schlatter disease and Sever disease." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav id="navbar">
+    <div class="nav-inner">
+      <a href="#hero" class="nav-logo">LEAP</a>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="#about">About</a></li>
+        <li><a href="#studies">Studies</a></li>
+        <li><a href="#team">Team</a></li>
+        <li><a href="#publications">Publications</a></li>
+        <li><a href="publications.html">Research</a></li>
+        <li><a href="rationale.html">Rationale</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section id="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-content">
+      <div class="hero-badge">Medical University of Gdańsk</div>
+      <h1 class="hero-title">
+        Redefining how we<br>
+        <span class="hero-title-accent">understand and treat</span><br>
+        apophyseal pain<br>in youth athletes
+      </h1>
+      <p class="hero-description">
+        A multidomain research program combining biomarkers, ultrasound imaging,
+        functional testing, and clinical trials to advance evidence-based care
+        for Osgood–Schlatter disease and Sever disease.
+      </p>
+      <div class="hero-cta">
+        <a href="#studies" class="btn-primary">View Studies</a>
+        <a href="https://clinicaltrials.gov/study/NCT07446517" target="_blank" rel="noopener" class="btn-secondary">
+          ClinicalTrials.gov
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        </a>
+      </div>
+      <div class="hero-nct-badges">
+        <span class="nct-badge recruiting">● Recruiting · NCT07446517</span>
+        <span class="nct-badge pending">◌ Upcoming · NCT07521280</span>
+      </div>
+    </div>
+    <div class="hero-scroll-hint">
+      <span>Scroll</span>
+      <svg width="16" height="24" viewBox="0 0 16 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="14" height="22" rx="7"/><circle cx="8" cy="8" r="2" fill="currentColor" stroke="none"><animate attributeName="cy" values="8;14;8" dur="1.8s" repeatCount="indefinite"/></circle></svg>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section id="about">
+    <div class="container">
+      <div class="section-label">The Problem</div>
+      <h2 class="section-title">Why LEAP matters</h2>
+
+      <div class="about-grid">
+        <div class="about-text">
+          <p class="lead">
+            Lower-extremity apophyseal pathologies — Osgood–Schlatter disease and Sever disease — are among the most prevalent musculoskeletal conditions in youth athletes, yet they remain poorly understood and undertreated.
+          </p>
+          <p>
+            Current clinical practice frequently defaults to a "wait and see" approach, despite growing evidence that these conditions are not trivially self-limiting. Recent data show that adults with a history of Osgood–Schlatter disease have significantly worse knee health and a higher risk of developing patellar tendinopathy (Krommes et al., 2025). Meanwhile, 25% of practitioners still recommend watchful waiting as the primary strategy (Lyng et al., 2020).
+          </p>
+          <p>
+            No high-quality randomized controlled trial of conservative treatment currently exists for this population. The LEAP project aims to close that gap.
+          </p>
+          <a href="rationale.html" class="btn-outline" style="margin-top:8px; width:fit-content;">
+            Read the full scientific rationale →
+          </a>
+        </div>
+
+        <div class="stat-grid">
+          <div class="stat-card">
+            <div class="stat-number">25%</div>
+            <div class="stat-label">of practitioners still use "wait and see" as primary management</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">0</div>
+            <div class="stat-label">high-quality RCTs of conservative treatment exist in this population</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">↑</div>
+            <div class="stat-label">risk of patellar tendinopathy in adults with prior Osgood–Schlatter</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">10–17</div>
+            <div class="stat-label">years — peak incidence window in youth athletes</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="approach-section">
+        <div class="section-label">Our Approach</div>
+        <h3>A multidomain framework</h3>
+        <div class="approach-grid">
+          <div class="approach-card">
+            <div class="approach-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/></svg>
+            </div>
+            <h4>Biomarker Panel</h4>
+            <p>Cartilage turnover, bone turnover, and inflammatory markers (CRP, vitamin D, IL-family) to characterize the biological landscape of apophyseal pathology.</p>
+          </div>
+          <div class="approach-card">
+            <div class="approach-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/><path d="M11 8v6M8 11h6"/></svg>
+            </div>
+            <h4>Ultrasound Imaging</h4>
+            <p>Structural assessment of the apophysis at baseline and post-intervention to track morphological changes alongside clinical outcomes.</p>
+          </div>
+          <div class="approach-card">
+            <div class="approach-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            </div>
+            <h4>Functional Testing</h4>
+            <p>Validated performance-based and patient-reported outcomes (KOOS-Child, OxAFQ-C, NPRS) alongside biomechanical assessment.</p>
+          </div>
+          <div class="approach-card">
+            <div class="approach-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
+            <h4>Controlled Trials</h4>
+            <p>Rigorous randomized and prospective designs — from a double-blind sham-controlled LLLT pilot RCT to an individualized rehabilitation feasibility study.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STUDIES -->
+  <section id="studies">
+    <div class="container">
+      <div class="section-label">Registered Studies</div>
+      <h2 class="section-title">Two linked clinical studies</h2>
+      <p class="section-intro">LEAP-PHEN and LEAP-REHAB are methodologically linked — participants completing the photobiomodulation trial may continue into the rehabilitation study through a post-trial pathway.</p>
+
+      <div class="study-tabs">
+        <button class="tab-btn active" data-tab="phen">
+          <span class="tab-label">LEAP-PHEN</span>
+          <span class="tab-sub">NCT07446517</span>
+        </button>
+        <button class="tab-btn" data-tab="rehab">
+          <span class="tab-label">LEAP-REHAB</span>
+          <span class="tab-sub">NCT07521280</span>
+        </button>
+      </div>
+
+      <!-- LEAP-PHEN -->
+      <div class="study-panel active" id="tab-phen">
+        <div class="study-header">
+          <div>
+            <h3>LEAP-PHEN</h3>
+            <p class="study-full-title">Multidomain Phenotyping of Lower-Extremity Apophyseal Pain in Youth Athletes Using Biomarkers, Ultrasound, and Functional Testing, with an Embedded Double-Blind Pilot Photobiomodulation Trial</p>
+          </div>
+          <div class="study-meta-badges">
+            <span class="badge green">● Recruiting</span>
+            <a href="https://clinicaltrials.gov/study/NCT07446517" target="_blank" rel="noopener" class="badge link">NCT07446517 ↗</a>
+          </div>
+        </div>
+
+        <div class="study-body">
+          <div class="study-col">
+            <div class="study-block">
+              <h4>Work Package 1 — Cross-Sectional Phenotyping</h4>
+              <p>Comparison of biomarker profiles, ultrasound findings, and functional parameters between youth athletes with LEAP (OSD + Sever) and a healthy matched control group. Each participant provides 5 ml of venous blood for analysis of CBC, CRP, vitamin D, and bone and cartilage turnover markers.</p>
+            </div>
+            <div class="study-block">
+              <h4>Work Package 2 — Pilot RCT (LLLT vs. Sham)</h4>
+              <p>The first randomized, double-blind, sham-controlled trial of low-level laser therapy (photobiomodulation) in youth athletes with apophyseal pain. Active LLLT uses a class 3B GaAlAs laser applied to the symptomatic apophyseal region over 10 sessions / 2 weeks.</p>
+              <ul class="study-list">
+                <li><strong>Masking:</strong> Triple — participant, investigator, outcomes assessor</li>
+                <li><strong>Allocation:</strong> 1:1 randomization (active LLLT vs. sham)</li>
+                <li><strong>Primary objective:</strong> Feasibility (recruitment, retention, adherence, safety)</li>
+                <li><strong>Secondary:</strong> Between-group differences in pain (NPRS) and function</li>
+                <li><strong>Exploratory:</strong> Biomarker and ultrasound changes to design a future full-scale RCT</li>
+              </ul>
+            </div>
+            <div class="study-block">
+              <h4>Scientific Rationale for LLLT</h4>
+              <p>A 2022 meta-analysis demonstrated significant reductions in pain and dysfunction with LLLT in tendinopathy and plantar fasciitis (Naterstad et al.). LLLT reduces pro-inflammatory cytokines (IL-1, IL-6, IL-8, IL-18) and mediators (PGE2, TNF-α, IL-6), with mechanism overlap relevant to apophyseal pathology (Berni et al., 2023). No prior evidence exists for LLLT in LEAP.</p>
+            </div>
+          </div>
+
+          <div class="study-sidebar">
+            <div class="info-card">
+              <div class="info-row"><span>Status</span><span class="green">Recruiting</span></div>
+              <div class="info-row"><span>Study type</span><span>Interventional</span></div>
+              <div class="info-row"><span>Design</span><span>Parallel RCT, triple-masked</span></div>
+              <div class="info-row"><span>N</span><span>30 (anticipated)</span></div>
+              <div class="info-row"><span>Age</span><span>10–17 years</span></div>
+              <div class="info-row"><span>Started</span><span>March 1, 2026</span></div>
+              <div class="info-row"><span>Primary completion</span><span>Feb 2027</span></div>
+              <div class="info-row"><span>Full completion</span><span>Feb 2029</span></div>
+              <div class="info-row"><span>Ethics</span><span>KB/591/2025-2026</span></div>
+            </div>
+            <div class="timeline-card">
+              <h5>Study Timeline</h5>
+              <div class="timeline">
+                <div class="tl-item done">
+                  <div class="tl-dot"></div>
+                  <div><strong>T0</strong> Baseline — WP1 cross-section + WP2 randomization</div>
+                </div>
+                <div class="tl-item active">
+                  <div class="tl-dot"></div>
+                  <div><strong>Intervention</strong> 10 sessions over 2 weeks (LLLT vs. sham)</div>
+                </div>
+                <div class="tl-item">
+                  <div class="tl-dot"></div>
+                  <div><strong>T1</strong> Post-intervention assessment</div>
+                </div>
+                <div class="tl-item">
+                  <div class="tl-dot"></div>
+                  <div><strong>T2</strong> 3-month follow-up</div>
+                </div>
+              </div>
+            </div>
+            <a href="https://clinicaltrials.gov/study/NCT07446517" target="_blank" rel="noopener" class="btn-outline full">
+              View on ClinicalTrials.gov ↗
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- LEAP-REHAB -->
+      <div class="study-panel" id="tab-rehab">
+        <div class="study-header">
+          <div>
+            <h3>LEAP-REHAB</h3>
+            <p class="study-full-title">Feasibility, Clinical Response, and Exploratory Predictors of an Individualized Load-Based Rehabilitation Pathway in Youth Athletes With Osgood-Schlatter Disease or Sever Disease: A Prospective Single-Arm Interventional Study</p>
+          </div>
+          <div class="study-meta-badges">
+            <span class="badge yellow">◌ Not yet recruiting</span>
+            <a href="https://clinicaltrials.gov/study/NCT07521280" target="_blank" rel="noopener" class="badge link">NCT07521280 ↗</a>
+          </div>
+        </div>
+
+        <div class="study-body">
+          <div class="study-col">
+            <div class="study-block">
+              <h4>Rehabilitation Pathway</h4>
+              <p>A 12-week individualized rehabilitation program built on a standardized core framework, individualized by symptom response rather than fixed timelines. The program targets load tolerance and movement quality in tasks relevant to youth sport.</p>
+              <ul class="study-list">
+                <li>Education and pain monitoring (activity diary)</li>
+                <li>Activity-ladder approach with symptom-guided progression</li>
+                <li>Motor-control training and basic strength exposure</li>
+                <li>Squatting, single-leg control, step/split-squat, calf loading</li>
+                <li>Gradual return to running, jumping, deceleration, sport-specific tasks</li>
+              </ul>
+            </div>
+            <div class="study-block">
+              <h4>Entry Pathways</h4>
+              <p>Participants may enter through three routes (used for descriptive subgroup analyses, not treatment arms):</p>
+              <ul class="study-list">
+                <li><strong>Post-trial:</strong> after completing LEAP-PHEN (NCT07446517)</li>
+                <li><strong>Direct entry — active symptoms:</strong> current OSD or Sever pain</li>
+                <li><strong>Direct entry — residual:</strong> previous symptoms, low-irritability presentation</li>
+              </ul>
+            </div>
+            <div class="study-block">
+              <h4>Primary Objectives (Feasibility)</h4>
+              <ul class="study-list">
+                <li>Attendance at planned in-person physiotherapy review visits</li>
+                <li>Home-exercise adherence ≥70% of study weeks</li>
+                <li>Intervention fidelity (protocol elements delivered and documented)</li>
+                <li>Retention at follow-up assessment</li>
+                <li>Safety — adverse events count and classification</li>
+              </ul>
+            </div>
+            <div class="study-block">
+              <h4>Secondary Outcomes</h4>
+              <ul class="study-list">
+                <li>Pain: NPRS worst pain in last 7 days (baseline → 12 weeks)</li>
+                <li>Knee function: KOOS-Child (OSD subgroup)</li>
+                <li>Foot/ankle function: OxAFQ-C (Sever subgroup)</li>
+                <li>Return-to-sport status (ordinal participation categories)</li>
+                <li>Patient Global Impression of Change (PGIC, ≥"much improved")</li>
+              </ul>
+            </div>
+            <div class="study-block">
+              <h4>Open Data</h4>
+              <p>De-identified individual participant data, statistical analysis plan, and analytic code will be made openly available through OSF after primary publication, for at least 5 years.</p>
+            </div>
+          </div>
+
+          <div class="study-sidebar">
+            <div class="info-card">
+              <div class="info-row"><span>Status</span><span class="yellow">Not yet recruiting</span></div>
+              <div class="info-row"><span>Study type</span><span>Interventional</span></div>
+              <div class="info-row"><span>Design</span><span>Single-arm, open-label</span></div>
+              <div class="info-row"><span>N</span><span>45 (anticipated)</span></div>
+              <div class="info-row"><span>Age</span><span>10–17 years</span></div>
+              <div class="info-row"><span>Planned start</span><span>May 20, 2026</span></div>
+              <div class="info-row"><span>Primary completion</span><span>Apr 2027</span></div>
+              <div class="info-row"><span>Full completion</span><span>Apr 2029</span></div>
+              <div class="info-row"><span>Ethics</span><span>KB/591/2025-2026</span></div>
+            </div>
+            <div class="timeline-card">
+              <h5>Study Timeline</h5>
+              <div class="timeline">
+                <div class="tl-item">
+                  <div class="tl-dot"></div>
+                  <div><strong>Entry</strong> Baseline rehabilitation assessment</div>
+                </div>
+                <div class="tl-item">
+                  <div class="tl-dot"></div>
+                  <div><strong>Weeks 1–12</strong> Individualized rehabilitation + home program</div>
+                </div>
+                <div class="tl-item">
+                  <div class="tl-dot"></div>
+                  <div><strong>~12 weeks</strong> Follow-up assessment + PGIC</div>
+                </div>
+              </div>
+            </div>
+            <a href="https://clinicaltrials.gov/study/NCT07521280" target="_blank" rel="noopener" class="btn-outline full">
+              View on ClinicalTrials.gov ↗
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TEAM -->
+  <section id="team">
+    <div class="container">
+      <div class="section-label">Research Team</div>
+      <h2 class="section-title">Principal Investigator</h2>
+
+      <div class="team-layout">
+        <div class="pi-card">
+          <div class="pi-avatar">BW</div>
+          <div class="pi-info">
+            <h3>Dr. Bartosz Wilczyński</h3>
+            <p class="pi-role">Principal Investigator</p>
+            <p class="pi-affil">Department of Immunobiology and Environmental Microbiology<br>Medical University of Gdańsk</p>
+            <div class="pi-links">
+              <a href="https://orcid.org/0000-0002-8663-3698" target="_blank" rel="noopener" class="pi-link orcid">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.372 0 0 5.372 0 12s5.372 12 12 12 12-5.372 12-12S18.628 0 12 0zM7.369 4.378c.525 0 .947.431.947.947s-.422.947-.947.947a.95.95 0 0 1-.947-.947c0-.525.422-.947.947-.947zm-.722 3.038h1.444v10.041H6.647V7.416zm3.562 0h3.9c3.712 0 5.344 2.653 5.344 5.025 0 2.578-2.016 5.016-5.325 5.016h-3.919V7.416zm1.444 1.303v7.444h2.297c3.272 0 3.922-2.484 3.922-3.722 0-2.016-1.284-3.722-3.862-3.722h-2.357z"/></svg>
+                ORCID
+              </a>
+              <a href="https://scholar.google.com/citations?user=QzmqXZoAAAAJ&hl=en" target="_blank" rel="noopener" class="pi-link scholar">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M5.242 13.769L0 9.5 12 0l12 9.5-5.242 4.269C17.548 11.249 14.978 9.5 12 9.5c-2.977 0-5.548 1.748-6.758 4.269zM12 10a7 7 0 1 0 0 14 7 7 0 0 0 0-14z"/></svg>
+                Google Scholar
+              </a>
+              <a href="https://www.researchgate.net/profile/Bartosz-Wilczynski-3" target="_blank" rel="noopener" class="pi-link researchgate">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.586 0c-.818 0-1.508.19-2.073.565-.563.377-.97.936-1.213 1.68a3.193 3.193 0 0 0-.112.437 8.365 8.365 0 0 0-.078.53 9 9 0 0 0-.05.727c-.01.282-.013.621-.013 1.016a31.121 31.123 0 0 0 .014 1.017 9 9 0 0 0 .05.727 7.946 7.946 0 0 0 .077.53c.033.163.071.315.112.437.243.743.65 1.303 1.214 1.68.565.375 1.255.565 2.073.565.608 0 1.147-.103 1.618-.309.47-.205.877-.52 1.214-.94.337-.42.57-.916.712-1.483.14-.567.162-1.228.065-1.983h-3.144v1.988h1.22c-.067.338-.193.62-.378.844-.186.225-.411.38-.675.474a2.359 2.359 0 0 1-.634.095c-.44 0-.8-.09-1.08-.27a1.685 1.685 0 0 1-.63-.783 3.088 3.088 0 0 1-.165-.647 8.37 8.37 0 0 1-.05-.7c-.007-.268-.01-.59-.01-.964 0-.375.003-.697.01-.965a8.374 8.374 0 0 1 .05-.7 3.09 3.09 0 0 1 .165-.647c.152-.35.363-.612.632-.784.27-.17.63-.255 1.08-.255.328 0 .616.064.864.19.248.127.455.312.62.556.167.244.29.537.37.88h2.138a4.612 4.612 0 0 0-.553-1.66 3.622 3.622 0 0 0-1.077-1.2A4.514 4.514 0 0 0 21.2.33 5.88 5.88 0 0 0 19.586 0zM9.098 0v12.535h2.274V8.513l.976-.622 2.967 4.644h2.717L14.24 7.173l3.323-2.26H14.65l-3.276 2.275V0zm-5.5 0C2.006 0 1.109.45.665 1.352.224 2.254 0 3.53 0 5.18v13.64C0 20.47.224 21.746.665 22.648.109 23.55 2.006 24 3.598 24h16.804c1.592 0 2.49-.45 2.933-1.352.444-.902.665-2.178.665-3.828V5.18c0-1.65-.221-2.926-.665-3.828C22.892.45 21.994 0 20.402 0zm0 2.116h16.804c.74 0 1.218.164 1.43.49.213.328.32.887.32 1.675v13.438c0 .788-.107 1.347-.32 1.675-.212.326-.69.49-1.43.49H3.598c-.74 0-1.218-.164-1.43-.49-.213-.328-.32-.887-.32-1.675V4.281c0-.788.107-1.347.32-1.675.212-.326.69-.49 1.43-.49z"/></svg>
+                ResearchGate
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div class="institutions">
+          <h4>Institutional Affiliations &amp; Funders</h4>
+          <div class="logo-grid">
+            <div class="logo-item">
+              <img src="figury/FarU-GUMed-Logo_large_RGB.jpg" alt="Gdański Uniwersytet Medyczny · Uczelnie Fahrenheita" />
+              <span>Medical University of Gdańsk · Fahrenheit Universities</span>
+            </div>
+            <div class="logo-item logo-ncn">
+              <img src="figury/logo-NCN.png" alt="National Science Centre Poland" />
+              <span>National Science Centre (NCN)</span>
+            </div>
+          </div>
+          <div class="funding-detail">
+            <div class="funding-item">
+              <div class="funding-source">GUMed IDUB — <em>Młody Twórca Nauki</em> 2025</div>
+              <div class="funding-id">Grant No. 71-01428 · 44 549 PLN</div>
+            </div>
+            <div class="funding-item">
+              <div class="funding-source">NCN — MINIATURA 9</div>
+              <div class="funding-id">DEC-2025/09/X/NZ7/01758 · 49 808 PLN</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PUBLICATIONS -->
+  <section id="publications">
+    <div class="container">
+      <div class="section-label">Transparency &amp; Open Science</div>
+      <h2 class="section-title">Protocols, Preregistrations &amp; Related Work</h2>
+      <p class="section-intro">All study designs and protocols are publicly registered. Related preregistrations cover methodology, conceptual foundations, and measurement properties of tools used across the LEAP program.</p>
+
+      <h3 class="pub-subhead">Clinical Trial Registrations</h3>
+      <div class="pub-grid">
+        <div class="pub-card">
+          <div class="pub-type">ClinicalTrials.gov</div>
+          <h4>LEAP-PHEN — Pilot Photobiomodulation RCT</h4>
+          <p>Effect of Low-Level Laser Photobiomodulation on Pain, Function, Ultrasound Findings, and Biochemical Markers in Youth Athletes With Osgood-Schlatter Disease or Sever Disease: A Randomized, Double-Blind, Sham-Controlled Trial</p>
+          <div class="pub-meta"><span>Registered March 2026 · Status: Recruiting</span></div>
+          <a href="https://clinicaltrials.gov/study/NCT07446517" target="_blank" rel="noopener" class="pub-link">NCT07446517 ↗</a>
+        </div>
+
+        <div class="pub-card">
+          <div class="pub-type">ClinicalTrials.gov</div>
+          <h4>LEAP-REHAB — Individualized Rehabilitation Study</h4>
+          <p>Feasibility, Clinical Response, and Exploratory Predictors of an Individualized Load-Based Rehabilitation Pathway in Youth Athletes With Osgood-Schlatter Disease or Sever Disease</p>
+          <div class="pub-meta"><span>Registered May 2026 · Status: Not yet recruiting</span></div>
+          <a href="https://clinicaltrials.gov/study/NCT07521280" target="_blank" rel="noopener" class="pub-link">NCT07521280 ↗</a>
+        </div>
+      </div>
+
+      <h3 class="pub-subhead">OSF Preregistrations</h3>
+      <div class="pub-grid">
+        <div class="pub-card">
+          <div class="pub-type">OSF · Scoping Review</div>
+          <h4>Apophyseal Injuries in Youth Sport: A Scoping Review and Theory-Informed Conceptual Framework</h4>
+          <p>Development of an apophyseal-specific conceptual model embedding tissue state and maturation within a mechanobiological load–capacity logic. Follows PRISMA-ScR principles across orthopaedics, sports medicine, growth biology, and youth-sport research.</p>
+          <div class="pub-meta"><span>Wilczyński B. · Registered December 18, 2025 · CC-BY 4.0</span></div>
+          <a href="https://osf.io/a9ecq" target="_blank" rel="noopener" class="pub-link">OSF.IO/A9ECQ ↗</a>
+        </div>
+
+        <div class="pub-card">
+          <div class="pub-type">OSF · Mixed-Methods Study</div>
+          <h4>Beliefs and Experiences of Patients, Parents/Guardians, and Clinicians/Coaches During and After Osgood–Schlatter and Sever-Related Pain in Polish Youth</h4>
+          <p>Convergent mixed-methods study (qualitative interviews + quantitative PROMs) with translation, cross-cultural adaptation, and reliability testing of KOOS-Child, OxAFQ, and PODCI in Polish youth aged 10–18.</p>
+          <div class="pub-meta"><span>Wilczyński B., Zając B., Olszewski M. · Registered January 21, 2026 · CC-BY 4.0</span></div>
+          <a href="https://osf.io/kesa7" target="_blank" rel="noopener" class="pub-link">OSF.IO/KESA7 ↗</a>
+        </div>
+
+        <div class="pub-card">
+          <div class="pub-type">OSF · Reliability Study</div>
+          <h4>Reliability of Pain Provocation Tests and Local Swelling Assessment in Youth Athletes With Osgood-Schlatter or Sever Disease</h4>
+          <p>Embedded methodological substudy evaluating inter-rater reliability of standardized clinical pain provocation tests (palpation, resisted extension, heel squeeze) and swelling assessment by physiotherapists and a physician.</p>
+          <div class="pub-meta"><span>Wilczyński B. · Registered March 31, 2026 · CC-BY 4.0</span></div>
+          <a href="https://osf.io/mxdrb" target="_blank" rel="noopener" class="pub-link">OSF.IO/MXDRB ↗</a>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="contact">
+    <div class="container">
+      <div class="section-label">Get in Touch</div>
+      <h2 class="section-title">Contact</h2>
+
+      <div class="contact-layout">
+        <div class="contact-info">
+          <div class="contact-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            <div>
+              <div class="contact-label">Email</div>
+              <a href="mailto:bartosz.wilczynski@gumed.edu.pl">bartosz.wilczynski@gumed.edu.pl</a>
+            </div>
+          </div>
+          <div class="contact-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            <div>
+              <div class="contact-label">Address</div>
+              <span>Department of Immunobiology and Environmental Microbiology<br>Medical University of Gdańsk<br>Dębinki 7, 80-210 Gdańsk, Poland</span>
+            </div>
+          </div>
+          <div class="contact-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+            <div>
+              <div class="contact-label">GitHub</div>
+              <a href="https://github.com/BartWil/leap-project" target="_blank" rel="noopener">BartWil/leap-project</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="ethics-box">
+          <h4>Ethics &amp; Compliance</h4>
+          <p>Both studies have received ethics approval from the Bioethics Committee for Scientific Research, Medical University of Gdańsk.</p>
+          <div class="ethics-detail">
+            <div><strong>Approval:</strong> KB/591/2025-2026</div>
+            <div><strong>Committee:</strong> komisja.bioetyczna@gumed.edu.pl</div>
+            <div><strong>Compliance:</strong> Declaration of Helsinki · GDPR</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="container">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <span class="footer-logo">LEAP</span>
+          <span class="footer-tagline">Lower Extremity Apophyseal Pain Research Program</span>
+        </div>
+        <div class="footer-links">
+          <a href="#about">About</a>
+          <a href="#studies">Studies</a>
+          <a href="#team">Team</a>
+          <a href="#publications">Publications</a>
+          <a href="#contact">Contact</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 Bartosz Wilczyński · Medical University of Gdańsk</span>
+        <span>Funded by GUMed IDUB (71-01428) &amp; NCN MINIATURA 9 (DEC-2025/09/X/NZ7/01758)</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

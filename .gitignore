@@ -1,0 +1,9 @@
+# Source documents — not published
+*.pdf
+*.docx
+moje publikacje/
+info.md
+PROJECT_INFO.md
+
+# Internal
+.claude/
