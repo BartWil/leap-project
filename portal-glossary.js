@@ -2,7 +2,7 @@
   'use strict';
 
   const SESSION_KEY = 'leap-portal-authenticated';
-  const VERSION = '20260802-3';
+  const VERSION = '20260802-4';
 
   if (sessionStorage.getItem(SESSION_KEY) !== 'true') {
     location.replace(`portal.html?v=${VERSION}`);

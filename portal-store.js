@@ -27,11 +27,13 @@
     const data = clone(base);
     const changes = readChanges();
     data.coordinatorMessages = [];
+    data.notificationOutbox = [];
     if (!changes) return data;
 
     if (Array.isArray(changes.blocks)) data.blocks = clone(changes.blocks).map(normalizeBlock);
     if (Array.isArray(changes.tasks)) data.tasks = clone(changes.tasks);
     if (Array.isArray(changes.messages)) data.coordinatorMessages = clone(changes.messages);
+    if (Array.isArray(changes.notificationOutbox)) data.notificationOutbox = clone(changes.notificationOutbox);
     if (Array.isArray(changes.teamOverrides)) {
       const overrides = new Map(changes.teamOverrides.map(item => [item.id, item]));
       data.team = data.team.map(person => ({ ...person, ...(overrides.get(person.id) || {}) }));
@@ -47,6 +49,7 @@
       blocks: clone(data.blocks),
       tasks: clone(data.tasks),
       messages: clone(data.coordinatorMessages || []),
+      notificationOutbox: clone(data.notificationOutbox || []),
       teamOverrides: data.team.map(person => ({
         id: person.id,
         notesPublic: person.notesPublic,

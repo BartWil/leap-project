@@ -108,7 +108,7 @@
       exclusions: ['PGIC po interwencji', 'Zaślepione testy T1', 'Niezależne umawianie rodzin']
     },
     {
-      id: 'maciej', name: 'Maciej', slug: 'maciej',
+      id: 'maciej', name: 'Maciej Budek', slug: 'maciej-budek',
       primaryRole: 'OpenCap Acquisition and Data Integrity Coordinator', secondaryRoles: ['OpenCap Trainer'],
       teamCategories: ['Core operations'], status: 'Active',
       availability: ['Czwartek', 'Piątek'], backupMemberId: 'weronika', supervisorId: 'pi',
@@ -203,8 +203,13 @@
       notesPublic: 'Przydzielany do konkretnych stacji zgodnie z certyfikacją.',
       responsibilities: ['ROM', 'Antropometria', 'Wsparcie T0/W12'], exclusions: []
     },
-    ...[1, 2, 3, 4].map(number => ({
-      id: `student-${number}`, name: `Student ${number}`, slug: `student-${number}`,
+    ...[
+      [1, 'Zuza Sroka', 'zuza-sroka'],
+      [2, 'Zuzia Trzonkowska', 'zuzia-trzonkowska'],
+      [3, 'Student 3', 'student-3'],
+      [4, 'Student 4', 'student-4']
+    ].map(([number, name, slug]) => ({
+      id: `student-${number}`, name, slug,
       primaryRole: 'Certified T0/W12 Research Assessor', secondaryRoles: ['Flexible Assessor'],
       teamCategories: ['T0/W12 flexible assessment pool'], status: number === 4 ? 'Onboarding' : 'Active',
       availability: number % 2 ? ['Czwartek', 'Piątek'] : ['Piątek'],
@@ -427,7 +432,7 @@
     { id: 'log-001', at: '2026-07-31 09:12', userId: 'magda', action: 'Zmieniono termin T0 dla LEAP-006' },
     { id: 'log-002', at: '2026-07-31 08:48', userId: 'maciej', action: 'Zgłoszono OpenCap QC failure dla LEAP-009' },
     { id: 'log-003', at: '2026-07-30 16:22', userId: 'filip', action: 'Uzupełniono sesję LLLT 6/10 dla LEAP-001' },
-    { id: 'log-004', at: '2026-07-30 12:05', userId: 'karol', action: 'Certyfikowano Student 2 — ROM' },
+    { id: 'log-004', at: '2026-07-30 12:05', userId: 'karol', action: 'Certyfikowano Zuzia Trzonkowska — ROM' },
     { id: 'log-005', at: '2026-07-29 15:41', userId: 'julia', action: 'Dodano drugą próbę kontaktu follow-up LEAP-004' }
   ];
 
@@ -449,6 +454,7 @@
       { id: 'viewer', label: 'Viewer', memberId: 'marta' }
     ],
     stations: stationCatalog,
-    team, competencies, participants, blocks, moduleRecords, dataQueries, tasks, documents, auditLog
+    team, competencies, participants, blocks, moduleRecords, dataQueries, tasks, documents, auditLog,
+    notificationOutbox: []
   };
 })();

@@ -373,6 +373,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
   font-size: 11px;
   line-height: 1.5;
 }
+.notification-queue-note { margin-top: 7px; color: var(--ink); font-weight: 600; }
 
 @media (max-width: 760px) {
   .simple-header { align-items: flex-start; }
