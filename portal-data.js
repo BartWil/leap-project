@@ -316,15 +316,19 @@
         ['hhd-q', 'nikodem', 'student-3', '09:00', '13:00', ['LEAP-002', 'LEAP-010'], 'Certified']
       ]
     }
-  ].map(block => ({
-    ...block,
-    stationAssignments: block.stationAssignments.map((assignment, index) => ({
+  ].map(block => {
+    const stationAssignments = block.stationAssignments.map((assignment, index) => ({
       id: `${block.id}-assignment-${index + 1}`, blockId: block.id,
       stationId: assignment[0], memberId: assignment[1], backupMemberId: assignment[2],
       startTime: assignment[3], endTime: assignment[4], participantIds: assignment[5],
       competencyStatusAtAssignment: assignment[6], conflictWarnings: [], status: 'Planned'
-    }))
-  }));
+    }));
+    const invitedMemberIds = [...new Set([
+      block.clinicalLeadId,
+      ...stationAssignments.flatMap(assignment => [assignment.memberId, assignment.backupMemberId])
+    ].filter(Boolean))];
+    return { ...block, invitedMemberIds, stationAssignments };
+  });
 
   const competencies = [];
   const certifiedCore = ['registration', 'prom', 'nprs', 'anthropometry', 'tanita', 'rom', 'muscle-length', 'beighton', 'fpi', 'ybt', 'hhd-q', 'hhd-h', 'hhd-pf', 'pain-provocation', 'movement-quality', 'opencap-setup', 'opencap-recording', 'crf'];

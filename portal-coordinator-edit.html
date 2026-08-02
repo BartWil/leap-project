@@ -9,14 +9,14 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Manrope:wght@500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="portal-simple.css?v=20260802-2" />
+  <link rel="stylesheet" href="portal-simple.css?v=20260802-3" />
 </head>
 <body>
   <header class="simple-header">
-    <a class="simple-brand" href="portal-coordinator.html?v=20260802-2"><span aria-hidden="true">L</span>LEAP</a>
+    <a class="simple-brand" href="portal-coordinator.html?v=20260802-3"><span aria-hidden="true">L</span>LEAP</a>
     <div class="header-actions">
-      <a class="quiet-link" href="portal-glossary.html?v=20260802-2">Słowniczek</a>
-      <a class="quiet-link" href="portal-coordinator.html?v=20260802-2">← Panel koordynatorów</a>
+      <a class="quiet-link" href="portal-glossary.html?v=20260802-3">Słowniczek</a>
+      <a class="quiet-link" href="portal-coordinator.html?v=20260802-3">← Panel koordynatorów</a>
     </div>
   </header>
 
@@ -63,6 +63,16 @@
         <label>Godzina zakończenia<input id="dayEnd" type="time" required /></label>
         <label class="field-wide">Miejsce<input id="dayLocation" type="text" required /></label>
         <label class="field-wide">Osoba prowadząca część kliniczną<select id="dayLead" required></select></label>
+        <fieldset class="field-wide invite-field">
+          <legend>Osoby zaproszone na ten dzień</legend>
+          <p class="invite-help">Prowadzący część kliniczną jest dodawany automatycznie. Zaznacz pozostałe osoby, których obecność jest potrzebna. Ta lista będzie później podstawą zaproszeń i przypomnień e-mail.</p>
+          <div class="invite-actions">
+            <button type="button" id="dayInviteAll">Zaznacz cały aktywny zespół</button>
+            <button type="button" id="dayInviteNone">Wyczyść pozostałe</button>
+          </div>
+          <div class="invite-list" id="dayInvitees"></div>
+          <p class="invite-summary" id="dayInviteSummary" aria-live="polite"></p>
+        </fieldset>
         <label class="field-wide">Ważna informacja<textarea id="dayNote" rows="3"></textarea></label>
         <div class="form-actions">
           <button class="form-submit" id="daySubmit" type="submit">Dodaj dzień badawczy</button>
@@ -108,8 +118,8 @@
     <p class="local-sync-note">Wersja demonstracyjna: zapis działa obecnie na tym urządzeniu. Synchronizację całego zespołu podłączymy do wspólnego arkusza Google.</p>
   </main>
 
-  <script src="portal-data.js?v=20260802-2"></script>
-  <script src="portal-store.js?v=20260802-2"></script>
-  <script src="portal-coordinator-edit.js?v=20260802-2"></script>
+  <script src="portal-data.js?v=20260802-3"></script>
+  <script src="portal-store.js?v=20260802-3"></script>
+  <script src="portal-coordinator-edit.js?v=20260802-3"></script>
 </body>
 </html>

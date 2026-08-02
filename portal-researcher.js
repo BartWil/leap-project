@@ -4,7 +4,7 @@
   const SESSION_KEY = 'leap-portal-authenticated';
   const COORDINATOR_SESSION_KEY = 'leap-coordinator-authenticated';
   const RESEARCHER_KEY = 'leap-researcher-id';
-  const VERSION = '20260802-2';
+  const VERSION = '20260802-3';
 
   if (sessionStorage.getItem(SESSION_KEY) !== 'true') {
     location.replace(`portal.html?v=${VERSION}`);
@@ -41,16 +41,30 @@
     return roles;
   }
 
+  function isInvited(block, memberId) {
+    return (block.invitedMemberIds || []).includes(memberId);
+  }
+
+  function isExpected(block, memberId) {
+    return isInvited(block, memberId) || assignmentsFor(block, memberId).length > 0;
+  }
+
   function renderDays(memberId) {
     const today = new Date().toISOString().slice(0, 10);
-    const blocks = [...data.blocks].filter(block => block.date >= today).sort((a, b) => a.date.localeCompare(b.date)).slice(0, 3);
+    const blocks = [...data.blocks]
+      .filter(block => block.date >= today && isExpected(block, memberId))
+      .sort((a, b) => a.date.localeCompare(b.date))
+      .slice(0, 3);
     if (!blocks.length) {
-      daysList.innerHTML = '<li><p class="empty-message">Nie ma obecnie zaplanowanych przyszłych dni badawczych.</p></li>';
+      daysList.innerHTML = '<li><p class="empty-message">Nie masz obecnie zaplanowanej obecności w przyszłym dniu badawczym.</p></li>';
       return;
     }
     daysList.innerHTML = blocks.map(block => {
       const roles = assignmentsFor(block, memberId);
-      return `<li><div class="item-row"><div><strong>${esc(formatDate(block.date))}, ${esc(block.startTime)}–${esc(block.endTime)}</strong><p>${esc(typeLabel(block.type))} · ${esc(block.location)}</p><p>${roles.length ? `<b>Twój przydział:</b> ${roles.map(esc).join('; ')}` : 'Nie masz jeszcze przydziału na ten dzień.'}</p></div><div class="item-meta"><span class="status ${roles.length ? 'status-ok' : ''}">${roles.length ? 'Masz przydział' : 'Bez przydziału'}</span></div></div></li>`;
+      const detail = roles.length
+        ? `<b>Twój przydział:</b> ${roles.map(esc).join('; ')}`
+        : 'Masz zaproszenie na ten dzień. Dokładny przydział może zostać uzupełniony później.';
+      return `<li><div class="item-row"><div><strong>${esc(formatDate(block.date))}, ${esc(block.startTime)}–${esc(block.endTime)}</strong><p>${esc(typeLabel(block.type))} · ${esc(block.location)}</p><p>${detail}</p></div><div class="item-meta"><span class="status status-ok">${roles.length ? 'Masz przydział' : 'Zaproszenie'}</span></div></div></li>`;
     }).join('');
   }
 
@@ -77,7 +91,7 @@
     (data.coordinatorMessages || [])
       .filter(item => (item.targetId === 'all' || item.targetId === memberId) && (!item.expiresDate || item.expiresDate >= today))
       .forEach(item => messages.push({ title: item.title, text: item.text }));
-    const assignedBlocks = [...data.blocks].sort((a, b) => a.date.localeCompare(b.date)).filter(block => assignmentsFor(block, memberId).length);
+    const assignedBlocks = [...data.blocks].sort((a, b) => a.date.localeCompare(b.date)).filter(block => isExpected(block, memberId));
     assignedBlocks.slice(0, 2).forEach(block => {
       if (block.notes) messages.push({ title: formatDate(block.date), text: block.notes });
     });

@@ -5,6 +5,15 @@
   const base = window.LEAP_DEMO_DATA;
   const clone = value => JSON.parse(JSON.stringify(value));
 
+  function normalizeBlock(block) {
+    if (Array.isArray(block.invitedMemberIds)) return block;
+    const invitedMemberIds = [...new Set([
+      block.clinicalLeadId,
+      ...(block.stationAssignments || []).flatMap(item => [item.memberId, item.backupMemberId])
+    ].filter(Boolean))];
+    return { ...block, invitedMemberIds };
+  }
+
   function readChanges() {
     try {
       const stored = JSON.parse(localStorage.getItem(STORAGE_KEY));
@@ -20,7 +29,7 @@
     data.coordinatorMessages = [];
     if (!changes) return data;
 
-    if (Array.isArray(changes.blocks)) data.blocks = clone(changes.blocks);
+    if (Array.isArray(changes.blocks)) data.blocks = clone(changes.blocks).map(normalizeBlock);
     if (Array.isArray(changes.tasks)) data.tasks = clone(changes.tasks);
     if (Array.isArray(changes.messages)) data.coordinatorMessages = clone(changes.messages);
     if (Array.isArray(changes.teamOverrides)) {

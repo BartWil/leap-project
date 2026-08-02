@@ -3,7 +3,7 @@
 
   const SESSION_KEY = 'leap-portal-authenticated';
   const COORDINATOR_SESSION_KEY = 'leap-coordinator-authenticated';
-  const VERSION = '20260802-2';
+  const VERSION = '20260802-3';
 
   if (sessionStorage.getItem(SESSION_KEY) !== 'true') {
     location.replace(`portal.html?v=${VERSION}`);
@@ -26,8 +26,9 @@
   const sortedBlocks = [...data.blocks].sort((a, b) => a.date.localeCompare(b.date));
   const nextBlock = sortedBlocks.find(block => block.date >= today) || sortedBlocks[sortedBlocks.length - 1];
   const missingBackups = nextBlock.stationAssignments.filter(item => !item.backupMemberId);
+  const invitedNames = (nextBlock.invitedMemberIds || []).map(personName);
   document.getElementById('coordinatorReadiness').textContent = `gotowość ${nextBlock.readinessScore}%`;
-  document.getElementById('coordinatorNextDay').innerHTML = `<div class="item-row"><div><strong>${esc(formatDate(nextBlock.date))}, ${esc(nextBlock.startTime)}–${esc(nextBlock.endTime)}</strong><p>${esc(typeLabel(nextBlock.type))} · ${esc(nextBlock.location)}</p><p>Osoba prowadząca część kliniczną: <b>${esc(personName(nextBlock.clinicalLeadId))}</b></p><p>${esc(nextBlock.notes)}</p></div><div class="item-meta"><span class="status ${nextBlock.readinessScore < 75 ? 'status-danger' : ''}">${esc(nextBlock.status === 'Ready with warnings' ? 'Gotowy z uwagami' : nextBlock.status)}</span><br>${nextBlock.participantIds.length} uczestników<br>${missingBackups.length} ${missingBackups.length === 1 ? 'brak zastępstwa' : 'braki zastępstw'}</div></div>`;
+  document.getElementById('coordinatorNextDay').innerHTML = `<div class="item-row"><div><strong>${esc(formatDate(nextBlock.date))}, ${esc(nextBlock.startTime)}–${esc(nextBlock.endTime)}</strong><p>${esc(typeLabel(nextBlock.type))} · ${esc(nextBlock.location)}</p><p>Osoba prowadząca część kliniczną: <b>${esc(personName(nextBlock.clinicalLeadId))}</b></p><p>Zaproszony zespół: <b>${invitedNames.length ? invitedNames.map(esc).join(', ') : 'jeszcze nikt'}</b></p><p>${esc(nextBlock.notes)}</p></div><div class="item-meta"><span class="status ${nextBlock.readinessScore < 75 ? 'status-danger' : ''}">${esc(nextBlock.status === 'Ready with warnings' ? 'Gotowy z uwagami' : nextBlock.status)}</span><br>${invitedNames.length} ${invitedNames.length === 1 ? 'zaproszona osoba' : invitedNames.length < 5 ? 'zaproszone osoby' : 'zaproszonych osób'}<br>${nextBlock.participantIds.length} uczestników<br>${missingBackups.length} ${missingBackups.length === 1 ? 'brak zastępstwa' : 'braki zastępstw'}</div></div>`;
 
   function limitedList(items, renderItem, emptyText, limit = 3) {
     if (!items.length) return `<li><p class="empty-message">${esc(emptyText)}</p></li>`;

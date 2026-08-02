@@ -3,7 +3,7 @@
 
   const SESSION_KEY = 'leap-portal-authenticated';
   const COORDINATOR_SESSION_KEY = 'leap-coordinator-authenticated';
-  const VERSION = '20260802-2';
+  const VERSION = '20260802-3';
 
   if (sessionStorage.getItem(SESSION_KEY) !== 'true') {
     location.replace(`portal.html?v=${VERSION}`);
@@ -40,6 +40,32 @@
   const dayDelete = document.getElementById('dayDelete');
   const dayType = document.getElementById('dayType');
   const dayLead = document.getElementById('dayLead');
+  const dayInvitees = document.getElementById('dayInvitees');
+  const dayInviteSummary = document.getElementById('dayInviteSummary');
+
+  function selectedInviteIds() {
+    const checkedIds = [...dayInvitees.querySelectorAll('input[type="checkbox"]:checked:not(:disabled)')]
+      .map(input => input.value);
+    return [...new Set([dayLead.value, ...checkedIds].filter(Boolean))];
+  }
+
+  function updateInviteSummary() {
+    const count = selectedInviteIds().length;
+    dayInviteSummary.textContent = count
+      ? `Zaproszono ${count} ${count === 1 ? 'osobę' : count < 5 ? 'osoby' : 'osób'}.`
+      : 'Nie wybrano jeszcze żadnej osoby.';
+  }
+
+  function renderInvitees(selectedIds = selectedInviteIds()) {
+    const selected = new Set(selectedIds);
+    const leadId = dayLead.value;
+    dayInvitees.innerHTML = activeTeam.map(person => {
+      const isLead = person.id === leadId;
+      const checked = isLead || selected.has(person.id);
+      return `<label class="invite-option${isLead ? ' is-lead' : ''}"><input type="checkbox" value="${esc(person.id)}" ${checked ? 'checked' : ''} ${isLead ? 'disabled' : ''} /><span>${esc(person.name)}${isLead ? '<small>prowadzi część kliniczną — dodano automatycznie</small>' : ''}</span></label>`;
+    }).join('');
+    updateInviteSummary();
+  }
 
   function refreshDayOptions(selectedId = '') {
     dayBlock.innerHTML = [...data.blocks]
@@ -63,6 +89,7 @@
     document.getElementById('dayLocation').value = block.location;
     dayType.value = ['T0', 'W12', 'T1', 'Mixed'].includes(block.type) ? block.type : 'Mixed';
     dayLead.value = block.clinicalLeadId || '';
+    renderInvitees(block.invitedMemberIds || [block.clinicalLeadId]);
     document.getElementById('dayNote').value = block.notes || '';
   }
 
@@ -74,6 +101,7 @@
     document.getElementById('dayNote').value = '';
     dayType.value = 'T0';
     dayLead.value = '';
+    renderInvitees([]);
   }
 
   function updateDayMode() {
@@ -117,6 +145,16 @@
 
   dayAction.addEventListener('change', updateDayMode);
   dayBlock.addEventListener('change', fillDay);
+  dayLead.addEventListener('change', () => renderInvitees(selectedInviteIds()));
+  dayInvitees.addEventListener('change', updateInviteSummary);
+  document.getElementById('dayInviteAll').addEventListener('click', () => {
+    dayInvitees.querySelectorAll('input[type="checkbox"]:not(:disabled)').forEach(input => { input.checked = true; });
+    updateInviteSummary();
+  });
+  document.getElementById('dayInviteNone').addEventListener('click', () => {
+    dayInvitees.querySelectorAll('input[type="checkbox"]:not(:disabled)').forEach(input => { input.checked = false; });
+    updateInviteSummary();
+  });
   document.getElementById('dutiesPerson').addEventListener('change', fillDuties);
 
   document.getElementById('dayForm').addEventListener('submit', event => {
@@ -131,6 +169,7 @@
         rooms: 0,
         status: 'Planned',
         readinessScore: 0,
+        invitedMemberIds: [],
         stationAssignments: []
       };
       data.blocks.push(block);
@@ -141,6 +180,7 @@
     block.type = dayType.value;
     block.location = document.getElementById('dayLocation').value.trim();
     block.clinicalLeadId = dayLead.value;
+    block.invitedMemberIds = selectedInviteIds();
     block.notes = document.getElementById('dayNote').value.trim();
     save(editing ? 'Zapisano zmiany dnia badawczego.' : 'Dodano nowy dzień badawczy.');
     refreshDayOptions(block.id);
