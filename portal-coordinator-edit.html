@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="pl" class="auth-pending">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow, noarchive" />
+  <title>LEAP — wprowadź zmianę</title>
+  <meta name="description" content="Edycja informacji widocznych w panelu badaczy LEAP." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Manrope:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="portal-simple.css?v=20260802-2" />
+</head>
+<body>
+  <header class="simple-header">
+    <a class="simple-brand" href="portal-coordinator.html?v=20260802-2"><span aria-hidden="true">L</span>LEAP</a>
+    <div class="header-actions">
+      <a class="quiet-link" href="portal-glossary.html?v=20260802-2">Słowniczek</a>
+      <a class="quiet-link" href="portal-coordinator.html?v=20260802-2">← Panel koordynatorów</a>
+    </div>
+  </header>
+
+  <main class="simple-main edit-main">
+    <header class="simple-intro">
+      <div>
+        <p class="eyebrow">Jedna zmiana naraz</p>
+        <h1>Wprowadź zmianę</h1>
+        <p>Zapisane informacje pojawią się także w uproszczonym panelu badacza.</p>
+      </div>
+    </header>
+
+    <nav class="edit-tabs" aria-label="Wybierz rodzaj zmiany">
+      <button class="active" type="button" data-edit-view="days">Dni badawcze</button>
+      <button type="button" data-edit-view="tasks">Zadania</button>
+      <button type="button" data-edit-view="duties">Obowiązki</button>
+      <button type="button" data-edit-view="messages">Komunikaty</button>
+    </nav>
+
+    <p class="save-status" id="editStatus" role="status" aria-live="polite"></p>
+
+    <section class="edit-panel" data-edit-panel="days">
+      <div class="edit-heading"><h2>Dzień badawczy</h2><p>Dodaj nowy termin albo zmień jeden z już zaplanowanych dni.</p></div>
+      <form class="edit-form" id="dayForm">
+        <label>Co chcesz zrobić?
+          <select id="dayAction" required>
+            <option value="add">Dodać nowy dzień</option>
+            <option value="edit">Zmienić istniejący dzień</option>
+          </select>
+        </label>
+        <label>Rodzaj dnia
+          <select id="dayType" required>
+            <option value="T0">T0</option>
+            <option value="W12">W12</option>
+            <option value="T1">T1</option>
+            <option value="Mixed">Blok mieszany</option>
+          </select>
+        </label>
+        <label class="field-wide" id="dayExistingField" hidden>Który istniejący dzień?
+          <select id="dayBlock" required></select>
+        </label>
+        <label>Data<input id="dayDate" type="date" required /></label>
+        <label>Godzina rozpoczęcia<input id="dayStart" type="time" required /></label>
+        <label>Godzina zakończenia<input id="dayEnd" type="time" required /></label>
+        <label class="field-wide">Miejsce<input id="dayLocation" type="text" required /></label>
+        <label class="field-wide">Osoba prowadząca część kliniczną<select id="dayLead" required></select></label>
+        <label class="field-wide">Ważna informacja<textarea id="dayNote" rows="3"></textarea></label>
+        <div class="form-actions">
+          <button class="form-submit" id="daySubmit" type="submit">Dodaj dzień badawczy</button>
+          <button class="form-delete" id="dayDelete" type="button" hidden>Usuń dzień</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="edit-panel" data-edit-panel="tasks" hidden>
+      <div class="edit-heading"><h2>Dodaj zadanie</h2><p>Wskaż jedną osobę, konkretną czynność i termin.</p></div>
+      <form class="edit-form" id="taskForm">
+        <label>Osoba odpowiedzialna<select id="taskOwner" required></select></label>
+        <label>Termin<input id="taskDue" type="date" required /></label>
+        <label class="field-wide">Krótki temat<input id="taskSubject" type="text" required maxlength="80" /></label>
+        <label class="field-wide">Co dokładnie trzeba zrobić?<textarea id="taskDescription" rows="3" required maxlength="300"></textarea></label>
+        <button class="form-submit" type="submit">Dodaj zadanie</button>
+      </form>
+      <div class="edit-current"><h3>Otwarte zadania</h3><ul class="plain-list" id="editableTasks"></ul></div>
+    </section>
+
+    <section class="edit-panel" data-edit-panel="duties" hidden>
+      <div class="edit-heading"><h2>Zmień obowiązki</h2><p>Edytuj krótki opis i listę widoczną w panelu wybranej osoby.</p></div>
+      <form class="edit-form" id="dutiesForm">
+        <label class="field-wide">Badacz<select id="dutiesPerson" required></select></label>
+        <label class="field-wide">Opis roli<textarea id="dutiesSummary" rows="3" required></textarea></label>
+        <label class="field-wide">Obowiązki — jeden w każdym wierszu<textarea id="dutiesList" rows="8" required></textarea></label>
+        <button class="form-submit" type="submit">Zapisz obowiązki</button>
+      </form>
+    </section>
+
+    <section class="edit-panel" data-edit-panel="messages" hidden>
+      <div class="edit-heading"><h2>Dodaj komunikat</h2><p>Komunikat może zobaczyć jedna osoba albo cały zespół.</p></div>
+      <form class="edit-form" id="messageForm">
+        <label>Odbiorca<select id="messageTarget" required><option value="all">Cały zespół</option></select></label>
+        <label>Ważny do<input id="messageExpiry" type="date" /></label>
+        <label class="field-wide">Tytuł<input id="messageTitle" type="text" required maxlength="80" /></label>
+        <label class="field-wide">Treść<textarea id="messageText" rows="4" required maxlength="400"></textarea></label>
+        <button class="form-submit" type="submit">Opublikuj komunikat</button>
+      </form>
+      <div class="edit-current"><h3>Aktualne komunikaty</h3><ul class="plain-list" id="editableMessages"></ul></div>
+    </section>
+
+    <p class="local-sync-note">Wersja demonstracyjna: zapis działa obecnie na tym urządzeniu. Synchronizację całego zespołu podłączymy do wspólnego arkusza Google.</p>
+  </main>
+
+  <script src="portal-data.js?v=20260802-2"></script>
+  <script src="portal-store.js?v=20260802-2"></script>
+  <script src="portal-coordinator-edit.js?v=20260802-2"></script>
+</body>
+</html>

@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="pl" class="auth-pending">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow, noarchive" />
+  <title>LEAP — OpenCap</title>
+  <meta name="description" content="Instrukcja stanowiska OpenCap podczas wizyty T0 projektu LEAP." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Manrope:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="portal-simple.css?v=20260802-2" />
+  <link rel="stylesheet" href="portal-training.css?v=20260802-2" />
+</head>
+<body>
+  <header class="simple-header">
+    <a class="simple-brand" href="portal-training.html?v=20260802-2"><span aria-hidden="true">L</span>LEAP</a>
+    <div class="header-actions">
+      <a class="quiet-link" href="portal-glossary.html?v=20260802-2">Słowniczek</a>
+      <a class="quiet-link" href="portal-training.html?v=20260802-2">Panel treningowy</a>
+      <button class="quiet-button" type="button" data-training-logout>Wyloguj</button>
+    </div>
+  </header>
+
+  <main class="simple-main training-main protocol-main">
+    <a class="protocol-back" href="portal-training.html?v=20260802-2">← Wszystkie materiały</a>
+
+    <header class="simple-intro training-intro protocol-intro">
+      <div>
+        <p class="eyebrow">Wizyta T0 · analiza ruchu</p>
+        <h1>OpenCap</h1>
+        <p>Trzy zsynchronizowane widoki, kalibracja, pozycja neutralna oraz nagranie SLS, CMJ i side hop.</p>
+      </div>
+      <div class="visit-parts" aria-label="Zakres modułu OpenCap">
+        <span>3 kamery</span>
+        <span>3 zadania</span>
+      </div>
+    </header>
+
+    <section class="warmup-required" aria-labelledby="openCapWarmupTitle">
+      <span class="warmup-stop">01</span>
+      <div>
+        <p class="eyebrow">Zanim uruchomisz test</p>
+        <h2 id="openCapWarmupTitle">Najpierw ustandaryzowana rozgrzewka</h2>
+        <p>Rozgrzewka jest obowiązkowa przed OpenCap i HHD. Otwórz instrukcję, wykonaj pełne 8–10 minut i dopiero wtedy rozpocznij nagrania.</p>
+        <a class="warmup-link" href="portal-training-warmup.html?v=20260802-2">Otwórz rozgrzewkę →</a>
+      </div>
+    </section>
+
+    <section class="opencap-setup-section" aria-labelledby="cameraSetupTitle">
+      <div class="training-section-heading">
+        <div>
+          <p class="eyebrow">Standard LEAP</p>
+          <h2 id="cameraSetupTitle">Stanowisko na trzy kamery</h2>
+        </div>
+        <small>nie przesuwaj po kalibracji</small>
+      </div>
+
+      <div class="camera-plan" aria-label="Rozmieszczenie trzech urządzeń wokół uczestnika">
+        <article>
+          <span>Kamera 01</span>
+          <strong>iPhone · stojak</strong>
+          <small>Widok skośny z lewej strony, około 30–45°.</small>
+        </article>
+        <div class="camera-subject">
+          <span aria-hidden="true">●</span>
+          <strong>Uczestnik</strong>
+          <small>w środku oznaczonej przestrzeni</small>
+        </div>
+        <article>
+          <span>Kamera 02</span>
+          <strong>iPhone · stojak</strong>
+          <small>Widok skośny z prawej strony, około 30–45°.</small>
+        </article>
+        <article class="camera-front">
+          <span>Kamera 03 · frontalna</span>
+          <strong>iPad · stabilne krzesło lub uchwyt</strong>
+          <small>Dokładnie naprzeciwko uczestnika. Nie trzymaj urządzenia w ręku.</small>
+        </article>
+      </div>
+
+      <p class="device-note"><strong>Sprzęt:</strong> dwa iPhone’y są podstawą stanowiska; jeden iPad tworzy widok frontalny, a drugi pozostaje w rezerwie. Wszystkie urządzenia muszą być nieruchome i widzieć całe ciało. OpenCap obsługuje iPhone’y i iPady wydane w 2018 roku lub później.</p>
+    </section>
+
+    <section class="training-video-card calibration-video-card" aria-labelledby="calibrationVideoTitle">
+      <div class="training-video-copy">
+        <p class="eyebrow">Krótki film stanowiskowy</p>
+        <h2 id="calibrationVideoTitle">Kartka A4 do kalibracji kamer</h2>
+        <p>Film pokazuje, jak równo przymocować kartkę A4 używaną podczas kalibracji. Kartka ma być płaska, ustawiona prosto i nieruchoma — bez przechylenia oraz zagięć.</p>
+        <ul class="check-list">
+          <li>przyklej kartkę równo do stabilnej, pionowej powierzchni,</li>
+          <li>sprawdź, czy cała kartka jest widoczna w każdym z trzech ujęć,</li>
+          <li>nie zmieniaj ustawienia kamer po wykonaniu kalibracji.</li>
+        </ul>
+      </div>
+      <figure class="training-video-frame">
+        <video class="training-video" controls preload="metadata" playsinline aria-label="Film pokazujący równe mocowanie kartki A4 do kalibracji OpenCap">
+          <source src="assets/training/OpenCap_calibration_A4.mp4" type="video/mp4" />
+          Twoja przeglądarka nie obsługuje odtwarzania filmu MP4.
+        </video>
+        <figcaption>Równe mocowanie kartki A4 przed kalibracją.</figcaption>
+      </figure>
+    </section>
+
+    <section class="protocol-start-grid" aria-label="Przygotowanie stanowiska OpenCap">
+      <article class="protocol-start-card card-sage">
+        <p class="eyebrow">Przygotuj</p>
+        <h2>Sprzęt</h2>
+        <ul class="check-list">
+          <li>dwa iPhone’y, iPad frontalny i zapasowy iPad,</li>
+          <li>dwa stojaki oraz stabilne krzesło lub trzeci uchwyt,</li>
+          <li>laptop z aplikacją internetową OpenCap,</li>
+          <li>pionową planszę kalibracyjną,</li>
+          <li>oznaczenia na podłodze i stabilne połączenie z internetem.</li>
+        </ul>
+      </article>
+
+      <article class="protocol-start-card">
+        <p class="eyebrow">Przygotuj</p>
+        <h2>Uczestnika</h2>
+        <ul class="check-list">
+          <li>krótkie spodenki i możliwie dopasowaną koszulkę,</li>
+          <li>boso podczas SLS i CMJ,</li>
+          <li>buty zakładane dopiero przed side hopem,</li>
+          <li>kod uczestnika, masę ciała, wzrost i rok urodzenia,</li>
+          <li>bez imienia, nazwiska ani innych danych identyfikacyjnych.</li>
+        </ul>
+      </article>
+    </section>
+
+    <section class="opencap-flow-section" aria-labelledby="sessionFlowTitle">
+      <div class="training-section-heading">
+        <div>
+          <p class="eyebrow">Kolejność ma znaczenie</p>
+          <h2 id="sessionFlowTitle">Przygotuj sesję</h2>
+        </div>
+        <small>6 kroków</small>
+      </div>
+
+      <ol class="opencap-flow">
+        <li><span>01</span><div><strong>Rozstaw urządzenia.</strong><p>Użyj taśm na podłodze. Sprawdź w każdym podglądzie, czy całe ciało pozostaje widoczne podczas wszystkich zadań.</p></div></li>
+        <li><span>02</span><div><strong>Połącz urządzenia.</strong><p>Najpierw połącz wszystkie trzy urządzenia z sesją OpenCap, a dopiero potem zamocuj je stabilnie na stojakach i krześle lub uchwycie.</p></div></li>
+        <li><span>03</span><div><strong>Ustaw planszę.</strong><p>Umieść planszę w środku przestrzeni pomiarowej, możliwie pionowo i w polu widzenia wszystkich kamer.</p></div></li>
+        <li><span>04</span><div><strong>Wykonaj kalibrację.</strong><p>Uruchom konfigurację na laptopie i nie dotykaj kamer po jej zakończeniu. Przesunięcie urządzenia oznacza konieczność nowej kalibracji.</p></div></li>
+        <li><span>05</span><div><strong>Wpisz dane kodowane.</strong><p>Utwórz uczestnika, używając wyłącznie kodu, np. B001. Wpisz masę, wzrost i rok urodzenia zgodne z pomiarami.</p></div></li>
+        <li><span>06</span><div><strong>Nagraj Neutral.</strong><p>Uczestnik stoi nieruchomo. Sprawdź, czy nie pochyla się w przód ani w tył oraz czy szkielet jest kompletny we wszystkich widokach.</p></div></li>
+      </ol>
+    </section>
+
+    <section class="recording-command" aria-labelledby="recordingCommandTitle">
+      <p class="eyebrow">Ta sama komenda w każdym nagraniu</p>
+      <h2 id="recordingCommandTitle">„Pozycja” → START → „3, 2, 1” → ruch około 0:02</h2>
+      <p>Najpierw uczestnik przyjmuje pozycję startową. Operator uruchamia nagrywanie i odlicza. Ruch powinien rozpocząć się około dwóch sekund po starcie zapisu.</p>
+    </section>
+
+    <section class="test-section" aria-labelledby="openCapTasksTitle">
+      <div class="training-section-heading">
+        <div>
+          <p class="eyebrow">Jedna próba zapoznawcza, potem nagrania</p>
+          <h2 id="openCapTasksTitle">Trzy zadania</h2>
+        </div>
+        <small>zawsze w tej kolejności</small>
+      </div>
+
+      <div class="test-list">
+        <details class="test-procedure">
+          <summary>
+            <span class="test-number">01</span>
+            <span><strong>SLS — przysiad jednonóż</strong><small>boso · prawa i lewa strona · po 3 nagrania</small></span>
+            <span class="details-toggle">Rozwiń</span>
+          </summary>
+          <div class="procedure-body">
+            <ol class="procedure-steps">
+              <li><strong>Wyjaśnij zadanie.</strong><span>Uczestnik stoi na jednej nodze i wykonuje kontrolowany przysiad jednonóż.</span></li>
+              <li><strong>Wykonaj próbę zapoznawczą.</strong><span>Jedna próba nie jest nagrywana. Zwróć uwagę, aby uczestnik nie pochylał nadmiernie tułowia do przodu.</span></li>
+              <li><strong>Nagraj prawą stronę.</strong><span>Trzy prawidłowe próby: SLS_P_001, SLS_P_002 i SLS_P_003.</span></li>
+              <li><strong>Nagraj lewą stronę.</strong><span>Trzy prawidłowe próby: SLS_L_001, SLS_L_002 i SLS_L_003.</span></li>
+            </ol>
+          </div>
+        </details>
+
+        <details class="test-procedure">
+          <summary>
+            <span class="test-number">02</span>
+            <span><strong>CMJ — countermovement jump</strong><small>boso · obunóż · 3 nagrania</small></span>
+            <span class="details-toggle">Rozwiń</span>
+          </summary>
+          <div class="procedure-body">
+            <ol class="procedure-steps">
+              <li><strong>Ustaw pozycję.</strong><span>Uczestnik stoi obunóż, wyprostowany, z dłońmi opartymi na biodrach.</span></li>
+              <li><strong>Wyjaśnij ruch.</strong><span>Szybki ruch w dół do samodzielnie wybranej głębokości, następnie jak najwyższy wyskok.</span></li>
+              <li><strong>Wykonaj próbę zapoznawczą.</strong><span>Jedna próba nie jest nagrywana.</span></li>
+              <li><strong>Nagraj trzy próby.</strong><span>Zapisz jako CMJ_001, CMJ_002 i CMJ_003. Dłonie pozostają na biodrach, a lądowanie jest stabilne na obu stopach.</span></li>
+            </ol>
+          </div>
+        </details>
+
+        <details class="test-procedure">
+          <summary>
+            <span class="test-number">03</span>
+            <span><strong>Side hop — skok boczny z odbiciem</strong><small>w butach · prawa i lewa strona · po 3 nagrania</small></span>
+            <span class="details-toggle">Rozwiń</span>
+          </summary>
+          <div class="procedure-body">
+            <ol class="procedure-steps">
+              <li><strong>Załóż buty i ustaw cel.</strong><span>Cel znajduje się około 0,5 m bocznie od pozycji startowej.</span></li>
+              <li><strong>Wyjaśnij ruch.</strong><span>Stojąc na badanej nodze, uczestnik skacze w bok w kierunku tej strony, po czym szybko i mocno odbija się z powrotem.</span></li>
+              <li><strong>Pilnuj kryteriów.</strong><span>Dłonie cały czas pozostają na biodrach. Po powrocie uczestnik utrzymuje równowagę na nodze podporowej.</span></li>
+              <li><strong>Wykonaj próbę zapoznawczą.</strong><span>Jedna próba nie jest nagrywana.</span></li>
+              <li><strong>Nagraj po trzy próby.</strong><span>Prawa: SD_P_001, SD_P_002 i SD_P_003. Lewa: SD_L_001, SD_L_002 i SD_L_003.</span></li>
+            </ol>
+            <p class="record-note"><strong>SD = side hop.</strong> To wewnętrzny kod nazwy pliku używany w LEAP. Publikacja źródłowa nazywa zadanie „side hop” i nie definiuje skrótu SD.</p>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <section class="opencap-qc-section" aria-labelledby="openCapQcTitle">
+      <div class="training-section-heading">
+        <div>
+          <p class="eyebrow">Po każdej próbie</p>
+          <h2 id="openCapQcTitle">Sprawdź status i nagranie</h2>
+        </div>
+        <small>nie zostawiaj błędu na później</small>
+      </div>
+
+      <div class="status-grid">
+        <article class="status-green"><span></span><strong>Zielony</strong><p>Próba przetworzona prawidłowo. Obejrzyj zapis i sprawdź jakość ruchu.</p></article>
+        <article class="status-orange"><span></span><strong>Pomarańczowy / żółty</strong><p>Próba jest jeszcze przetwarzana. Poczekaj na wynik.</p></article>
+        <article class="status-red"><span></span><strong>Czerwony</strong><p>Błąd przetwarzania. Sprawdź przyczynę i powtórz próbę.</p></article>
+      </div>
+
+      <div class="after-test-card">
+        <p class="eyebrow">Przed kolejnym uczestnikiem</p>
+        <h2>Rozpocznij nową sesję</h2>
+        <ul class="check-list check-list-columns">
+          <li>upewnij się, że wszystkie wymagane próby są zapisane,</li>
+          <li>sprawdź poprawność nazw prób P i L,</li>
+          <li>kliknij „New Session”,</li>
+          <li>zgodnie z instrukcją LEAP ponownie ustaw planszę i wykonaj kalibrację,</li>
+          <li>jeżeli któraś kamera została przesunięta — kalibracja jest obowiązkowa,</li>
+          <li>dla nowego uczestnika użyj wyłącznie jego kodu.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="crf-card" aria-labelledby="openCapPdfTitle">
+      <div>
+        <p class="eyebrow">Instrukcja stanowiskowa</p>
+        <h2 id="openCapPdfTitle">OpenCap — instrukcja PDF</h2>
+        <p>Dokument zawiera zrzuty ekranu konfiguracji, Neutral, kolejność zadań i schemat nazywania prób.</p>
+      </div>
+      <div class="crf-actions">
+        <a class="header-action-primary" href="assets/training/OpenCap_instruction.pdf" target="_blank" rel="noopener noreferrer">Otwórz PDF</a>
+        <a class="quiet-link" href="assets/training/OpenCap_instruction.pdf" download>Pobierz PDF</a>
+      </div>
+    </section>
+
+    <details class="calculation-note source-note">
+      <summary>Źródła i ważne zastrzeżenie metodologiczne</summary>
+      <div>
+        <p>Protokół LEAP opracowano częściowo na podstawie publikacji Lima i wsp. (2024): <a href="https://doi.org/10.1080/02640414.2024.2415233" target="_blank" rel="noopener noreferrer">Validity and reliability of trunk and lower-limb kinematics…</a></p>
+        <p>Publikacja wskazuje, że trafność i rzetelność OpenCap zależą od zadania i analizowanego stawu. Wyników nie należy traktować jako jednakowo dokładnych dla wszystkich kątów i wszystkich ruchów.</p>
+        <p>Aktualne informacje o urządzeniach i ustawieniu kamer: <a href="https://www.opencap.ai/get-started" target="_blank" rel="noopener noreferrer">OpenCap — Get Started</a> oraz <a href="https://www.opencap.ai/best-practices" target="_blank" rel="noopener noreferrer">OpenCap — Best Practices</a>.</p>
+      </div>
+    </details>
+
+    <p class="training-footnote">W razie rozbieżności obowiązuje zatwierdzony protokół LEAP i decyzja osoby prowadzącej część kliniczną.</p>
+  </main>
+
+  <script src="portal-training.js?v=20260802-2"></script>
+</body>
+</html>

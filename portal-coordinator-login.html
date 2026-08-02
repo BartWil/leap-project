@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="pl" class="auth-pending">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow, noarchive" />
+  <title>LEAP — dostęp koordynatorów</title>
+  <meta name="description" content="Logowanie do panelu koordynatorów projektu LEAP." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Manrope:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="portal-start.css?v=20260802-2" />
+  <link rel="stylesheet" href="portal-coordinator-login.css?v=20260802-2" />
+</head>
+<body>
+  <a class="start-brand" href="portal-start.html?v=20260802-2" aria-label="Wróć do strony startowej portalu LEAP">
+    <span aria-hidden="true">L</span>
+    <strong>LEAP</strong>
+  </a>
+
+  <main class="coordinator-login-main">
+    <section class="coordinator-login-card" aria-labelledby="coordinatorLoginTitle">
+      <a class="coordinator-back" href="portal-start.html?v=20260802-2">← Wróć do wyboru panelu</a>
+      <p class="coordinator-eyebrow">Dostęp ograniczony</p>
+      <h1 id="coordinatorLoginTitle">Panel koordynatorów</h1>
+      <p class="coordinator-intro">Wpisz hasło koordynatorów, aby otworzyć widok zarządzania projektem.</p>
+
+      <form id="coordinatorLoginForm" novalidate>
+        <label for="coordinatorPassword">Hasło</label>
+        <div class="coordinator-password-field">
+          <input type="password" id="coordinatorPassword" autocomplete="current-password" inputmode="numeric" placeholder="Wpisz hasło" required maxlength="32" aria-describedby="coordinatorLoginStatus" />
+          <button type="button" id="coordinatorPasswordToggle" aria-label="Pokaż hasło">Pokaż</button>
+        </div>
+        <button class="coordinator-submit" id="coordinatorLoginButton" type="submit">Wejdź do panelu</button>
+        <p class="coordinator-status" id="coordinatorLoginStatus" role="status" aria-live="polite"></p>
+      </form>
+    </section>
+  </main>
+
+  <script src="portal-coordinator-login.js?v=20260802-2"></script>
+</body>
+</html>

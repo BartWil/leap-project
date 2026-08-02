@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow, noarchive" />
+  <title>LEAP Research Operations — Portal badacza</title>
+  <meta name="description" content="Demonstracyjny panel operacyjny zespołu badawczego projektu LEAP." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="portal.css?v=20260802-2" />
+</head>
+<body>
+
+  <section class="login-screen" id="loginView" aria-labelledby="loginTitle">
+    <a href="index.html" class="login-brand" aria-label="Projekt LEAP — strona główna">
+      <span class="brand-mark">L</span>
+      <span>LEAP</span>
+    </a>
+    <div class="login-card">
+      <div class="login-lock" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+          <rect x="5" y="10" width="14" height="11" rx="2"></rect>
+          <path d="M8 10V7a4 4 0 0 1 8 0v3"></path>
+        </svg>
+      </div>
+      <p class="eyebrow">Dostęp dla zespołu badawczego</p>
+      <h1 id="loginTitle">Portal badacza</h1>
+      <p class="login-intro">Wprowadź wspólne hasło zespołu, aby przejść do panelu organizacyjnego projektu LEAP.</p>
+      <form id="loginForm" novalidate>
+        <label for="portalPassword">Hasło</label>
+        <div class="password-field">
+          <input type="password" id="portalPassword" autocomplete="current-password" placeholder="Wpisz hasło" required maxlength="64" aria-describedby="loginStatus" />
+          <button type="button" id="passwordToggle" aria-label="Pokaż hasło">Pokaż</button>
+        </div>
+        <button type="submit" class="primary-button login-submit" id="loginButton">Wejdź do portalu</button>
+        <p class="login-status" id="loginStatus" role="status" aria-live="polite"></p>
+      </form>
+      <p class="login-note">Wersja demonstracyjna · bez danych identyfikacyjnych uczestników</p>
+    </div>
+    <a href="index.html" class="login-back">← Wróć do publicznej strony projektu</a>
+  </section>
+
+  <div class="app-shell" id="appShell" hidden>
+    <aside class="sidebar" id="sidebar" aria-label="Główna nawigacja">
+      <div class="sidebar-header">
+        <a href="index.html" class="app-brand" aria-label="Projekt LEAP — strona główna">
+          <span class="brand-mark">L</span>
+          <span class="brand-copy"><strong>LEAP</strong><small>Research Operations</small></span>
+        </a>
+        <button type="button" class="icon-button sidebar-close" id="sidebarClose" aria-label="Zamknij menu">×</button>
+      </div>
+      <nav class="app-nav" id="appNav">
+        <span class="nav-section-label">Dla badacza</span>
+        <button type="button" data-view="home" class="active"><span class="nav-icon">⌂</span>Start</button>
+        <button type="button" data-view="research-days"><span class="nav-icon">□</span>Dni badawcze</button>
+        <button type="button" data-view="duties"><span class="nav-icon">✓</span>Obowiązki badaczy</button>
+        <button type="button" data-view="dashboard"><span class="nav-icon">◫</span>Panel koordynatorów</button>
+        <span class="nav-section-label">Panel rozszerzony</span>
+        <button type="button" data-view="participants"><span class="nav-icon">◎</span>Uczestnicy</button>
+        <button type="button" data-view="stations"><span class="nav-icon">⌘</span>T0 / W12</button>
+        <button type="button" data-view="modules"><span class="nav-icon">◇</span>Moduły</button>
+        <button type="button" data-view="team"><span class="nav-icon">◉</span>Zespół</button>
+        <button type="button" data-view="competencies"><span class="nav-icon">▦</span>Kompetencje</button>
+        <button type="button" data-view="data-quality"><span class="nav-icon">!</span>Data Quality <span class="nav-count" id="dqNavCount">0</span></button>
+        <button type="button" data-view="documents"><span class="nav-icon">≡</span>SOP i dokumenty</button>
+        <button type="button" data-view="admin"><span class="nav-icon">⚙</span>Administracja</button>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="demo-badge"><span></span>TRYB DEMO</div>
+        <p>Dane demonstracyjne. Bez integracji z REDCap, Google Sheets ani bazą danych.</p>
+        <button type="button" class="sidebar-logout" id="logoutButton">Wyloguj</button>
+      </div>
+    </aside>
+
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+    <div class="app-workspace">
+      <header class="topbar">
+        <button type="button" class="icon-button menu-button" id="menuButton" aria-label="Otwórz menu">☰</button>
+        <div class="topbar-project">
+          <strong id="topbarTitle">Start</strong>
+          <span id="dateRange">31 lipca – 14 sierpnia 2026</span>
+        </div>
+        <div class="global-search">
+          <label class="sr-only" for="globalSearch">Szukaj uczestnika, osoby lub modułu</label>
+          <span aria-hidden="true">⌕</span>
+          <input type="search" id="globalSearch" placeholder="Szukaj ID, osoby lub modułu…" autocomplete="off" />
+          <kbd>Ctrl K</kbd>
+          <div class="search-results" id="searchResults" hidden></div>
+        </div>
+        <button type="button" class="notification-button" id="notificationButton" aria-label="Zadania wymagające reakcji">
+          <span aria-hidden="true">♢</span><b id="notificationCount">0</b>
+        </button>
+        <div class="role-switcher">
+          <label for="roleSwitcher">DEMO ROLE SWITCHER</label>
+          <select id="roleSwitcher" aria-label="Wybierz demonstracyjną rolę"></select>
+        </div>
+        <button type="button" class="user-chip" id="userChip" aria-label="Otwórz profil bieżącego użytkownika">
+          <span class="avatar" id="userAvatar">BW</span>
+          <span><strong id="userName">Bartosz Wilczyński</strong><small id="userRole">PI / Admin</small></span>
+        </button>
+      </header>
+
+      <main class="app-content" id="appContent" tabindex="-1">
+        <div class="skeleton-view" aria-label="Ładowanie">
+          <div class="skeleton skeleton-title"></div>
+          <div class="skeleton-grid">
+            <div class="skeleton skeleton-card"></div><div class="skeleton skeleton-card"></div>
+            <div class="skeleton skeleton-card"></div><div class="skeleton skeleton-card"></div>
+          </div>
+          <div class="skeleton skeleton-table"></div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <div class="drawer-backdrop" id="drawerBackdrop" hidden></div>
+  <aside class="detail-drawer" id="detailDrawer" aria-label="Szczegóły" aria-hidden="true">
+    <button type="button" class="drawer-close" id="drawerClose" aria-label="Zamknij szczegóły">×</button>
+    <div id="drawerContent"></div>
+  </aside>
+
+  <div class="modal-backdrop" id="modalBackdrop" hidden>
+    <section class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <button type="button" class="modal-close" id="modalClose" aria-label="Zamknij okno">×</button>
+      <div id="modalContent"></div>
+    </section>
+  </div>
+
+  <div class="toast-region" id="toastRegion" aria-live="polite" aria-atomic="true"></div>
+
+  <script src="portal-data.js?v=20260802-2"></script>
+  <script src="portal.js?v=20260802-2"></script>
+</body>
+</html>

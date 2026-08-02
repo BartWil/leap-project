@@ -1,0 +1,230 @@
+(() => {
+  'use strict';
+
+  const SESSION_KEY = 'leap-portal-authenticated';
+  const COORDINATOR_SESSION_KEY = 'leap-coordinator-authenticated';
+  const VERSION = '20260802-2';
+
+  if (sessionStorage.getItem(SESSION_KEY) !== 'true') {
+    location.replace(`portal.html?v=${VERSION}`);
+    return;
+  }
+  if (sessionStorage.getItem(COORDINATOR_SESSION_KEY) !== 'true') {
+    location.replace(`portal-coordinator-login.html?v=${VERSION}`);
+    return;
+  }
+
+  let data = window.LEAP_PORTAL_STORE.load();
+  const status = document.getElementById('editStatus');
+  const activeTeam = data.team.filter(person => person.status !== 'Vacant');
+  const esc = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
+  const personName = id => data.team.find(person => person.id === id)?.name || 'Nieprzypisano';
+  const typeLabel = value => value === 'Mixed' ? 'Blok mieszany' : value;
+  const formatDate = value => value ? new Intl.DateTimeFormat('pl-PL', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date(`${value}T12:00:00`)) : 'bez terminu';
+
+  function save(message) {
+    window.LEAP_PORTAL_STORE.save(data);
+    status.textContent = message;
+    clearTimeout(save.timeout);
+    save.timeout = setTimeout(() => { status.textContent = ''; }, 4000);
+  }
+
+  function personOptions(includeAll = false) {
+    return `${includeAll ? '<option value="all">Cały zespół</option>' : ''}${activeTeam.map(person => `<option value="${esc(person.id)}">${esc(person.name)}</option>`).join('')}`;
+  }
+
+  const dayAction = document.getElementById('dayAction');
+  const dayBlock = document.getElementById('dayBlock');
+  const dayExistingField = document.getElementById('dayExistingField');
+  const daySubmit = document.getElementById('daySubmit');
+  const dayDelete = document.getElementById('dayDelete');
+  const dayType = document.getElementById('dayType');
+  const dayLead = document.getElementById('dayLead');
+
+  function refreshDayOptions(selectedId = '') {
+    dayBlock.innerHTML = [...data.blocks]
+      .sort((a, b) => a.date.localeCompare(b.date))
+      .map(block => `<option value="${esc(block.id)}">${esc(formatDate(block.date))} · ${esc(typeLabel(block.type))}</option>`).join('');
+    if (selectedId) dayBlock.value = selectedId;
+  }
+
+  refreshDayOptions();
+  document.getElementById('taskOwner').innerHTML = personOptions();
+  document.getElementById('dutiesPerson').innerHTML = personOptions();
+  document.getElementById('messageTarget').innerHTML = personOptions(true);
+  dayLead.innerHTML = `<option value="">— wybierz osobę —</option>${personOptions()}`;
+
+  function fillDay() {
+    const block = data.blocks.find(item => item.id === dayBlock.value);
+    if (!block) return;
+    document.getElementById('dayDate').value = block.date;
+    document.getElementById('dayStart').value = block.startTime;
+    document.getElementById('dayEnd').value = block.endTime;
+    document.getElementById('dayLocation').value = block.location;
+    dayType.value = ['T0', 'W12', 'T1', 'Mixed'].includes(block.type) ? block.type : 'Mixed';
+    dayLead.value = block.clinicalLeadId || '';
+    document.getElementById('dayNote').value = block.notes || '';
+  }
+
+  function prepareNewDay() {
+    document.getElementById('dayDate').value = '';
+    document.getElementById('dayStart').value = '09:00';
+    document.getElementById('dayEnd').value = '13:00';
+    document.getElementById('dayLocation').value = data.meta.location || '';
+    document.getElementById('dayNote').value = '';
+    dayType.value = 'T0';
+    dayLead.value = '';
+  }
+
+  function updateDayMode() {
+    const editing = dayAction.value === 'edit';
+    dayExistingField.hidden = !editing;
+    dayBlock.required = editing;
+    daySubmit.textContent = editing ? 'Zapisz zmiany dnia' : 'Dodaj dzień badawczy';
+    dayDelete.hidden = !editing;
+    if (editing) fillDay();
+    else prepareNewDay();
+  }
+
+  function fillDuties() {
+    const person = data.team.find(item => item.id === document.getElementById('dutiesPerson').value);
+    if (!person) return;
+    document.getElementById('dutiesSummary').value = person.notesPublic || '';
+    document.getElementById('dutiesList').value = person.responsibilities.join('\n');
+  }
+
+  function renderTasks() {
+    const tasks = data.tasks.filter(item => item.status !== 'Completed').sort((a, b) => a.dueDate.localeCompare(b.dueDate));
+    document.getElementById('editableTasks').innerHTML = tasks.length
+      ? tasks.map(item => `<li><div class="item-row"><div><strong>${esc(item.description)}</strong><p>${esc(personName(item.ownerId))} · termin ${esc(formatDate(item.dueDate))}</p></div><button class="row-action" type="button" data-complete-task="${esc(item.id)}">Zakończ</button></div></li>`).join('')
+      : '<li><p class="empty-message">Brak otwartych zadań.</p></li>';
+  }
+
+  function renderMessages() {
+    const messages = data.coordinatorMessages || [];
+    document.getElementById('editableMessages').innerHTML = messages.length
+      ? messages.map(item => `<li><div class="item-row"><div><strong>${esc(item.title)}</strong><p>${esc(item.targetId === 'all' ? 'Cały zespół' : personName(item.targetId))} · ${esc(item.text)}</p></div><button class="row-action" type="button" data-remove-message="${esc(item.id)}">Usuń</button></div></li>`).join('')
+      : '<li><p class="empty-message">Brak komunikatów koordynatorów.</p></li>';
+  }
+
+  document.querySelector('.edit-tabs').addEventListener('click', event => {
+    const button = event.target.closest('[data-edit-view]');
+    if (!button) return;
+    document.querySelectorAll('[data-edit-view]').forEach(item => item.classList.toggle('active', item === button));
+    document.querySelectorAll('[data-edit-panel]').forEach(panel => { panel.hidden = panel.dataset.editPanel !== button.dataset.editView; });
+    status.textContent = '';
+  });
+
+  dayAction.addEventListener('change', updateDayMode);
+  dayBlock.addEventListener('change', fillDay);
+  document.getElementById('dutiesPerson').addEventListener('change', fillDuties);
+
+  document.getElementById('dayForm').addEventListener('submit', event => {
+    event.preventDefault();
+    const editing = dayAction.value === 'edit';
+    let block = editing ? data.blocks.find(item => item.id === dayBlock.value) : null;
+    if (editing && !block) return;
+    if (!block) {
+      block = {
+        id: `block-${Date.now()}`,
+        participantIds: [],
+        rooms: 0,
+        status: 'Planned',
+        readinessScore: 0,
+        stationAssignments: []
+      };
+      data.blocks.push(block);
+    }
+    block.date = document.getElementById('dayDate').value;
+    block.startTime = document.getElementById('dayStart').value;
+    block.endTime = document.getElementById('dayEnd').value;
+    block.type = dayType.value;
+    block.location = document.getElementById('dayLocation').value.trim();
+    block.clinicalLeadId = dayLead.value;
+    block.notes = document.getElementById('dayNote').value.trim();
+    save(editing ? 'Zapisano zmiany dnia badawczego.' : 'Dodano nowy dzień badawczy.');
+    refreshDayOptions(block.id);
+    dayAction.value = 'edit';
+    updateDayMode();
+  });
+
+  dayDelete.addEventListener('click', () => {
+    const block = data.blocks.find(item => item.id === dayBlock.value);
+    if (!block || !confirm(`Usunąć dzień ${formatDate(block.date)} (${typeLabel(block.type)})?`)) return;
+    data.blocks = data.blocks.filter(item => item.id !== block.id);
+    save('Usunięto dzień badawczy.');
+    refreshDayOptions();
+    if (data.blocks.length) {
+      dayAction.value = 'edit';
+      updateDayMode();
+    } else {
+      dayAction.value = 'add';
+      updateDayMode();
+    }
+  });
+
+  document.getElementById('taskForm').addEventListener('submit', event => {
+    event.preventDefault();
+    data.tasks.push({
+      id: `task-${Date.now()}`,
+      priority: 'High',
+      subject: document.getElementById('taskSubject').value.trim(),
+      description: document.getElementById('taskDescription').value.trim(),
+      ownerId: document.getElementById('taskOwner').value,
+      dueDate: document.getElementById('taskDue').value,
+      status: 'Open',
+      targetView: 'dashboard'
+    });
+    event.target.reset();
+    save('Dodano zadanie. Badacz zobaczy je w swoim panelu.');
+    renderTasks();
+  });
+
+  document.getElementById('dutiesForm').addEventListener('submit', event => {
+    event.preventDefault();
+    const person = data.team.find(item => item.id === document.getElementById('dutiesPerson').value);
+    if (!person) return;
+    person.notesPublic = document.getElementById('dutiesSummary').value.trim();
+    person.responsibilities = document.getElementById('dutiesList').value.split('\n').map(item => item.trim()).filter(Boolean);
+    save(`Zapisano obowiązki: ${person.name}.`);
+  });
+
+  document.getElementById('messageForm').addEventListener('submit', event => {
+    event.preventDefault();
+    data.coordinatorMessages ||= [];
+    data.coordinatorMessages.unshift({
+      id: `message-${Date.now()}`,
+      targetId: document.getElementById('messageTarget').value,
+      title: document.getElementById('messageTitle').value.trim(),
+      text: document.getElementById('messageText').value.trim(),
+      expiresDate: document.getElementById('messageExpiry').value || null,
+      createdAt: new Date().toISOString()
+    });
+    event.target.reset();
+    save('Opublikowano komunikat.');
+    renderMessages();
+  });
+
+  document.addEventListener('click', event => {
+    const taskButton = event.target.closest('[data-complete-task]');
+    if (taskButton) {
+      const task = data.tasks.find(item => item.id === taskButton.dataset.completeTask);
+      if (task) task.status = 'Completed';
+      save('Zadanie oznaczono jako zakończone.');
+      renderTasks();
+      return;
+    }
+    const messageButton = event.target.closest('[data-remove-message]');
+    if (messageButton) {
+      data.coordinatorMessages = (data.coordinatorMessages || []).filter(item => item.id !== messageButton.dataset.removeMessage);
+      save('Usunięto komunikat.');
+      renderMessages();
+    }
+  });
+
+  updateDayMode();
+  fillDuties();
+  renderTasks();
+  renderMessages();
+  document.documentElement.classList.remove('auth-pending');
+})();
