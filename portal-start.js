@@ -5,7 +5,7 @@
   const COORDINATOR_SESSION_KEY = 'leap-coordinator-authenticated';
 
   if (sessionStorage.getItem(SESSION_KEY) !== 'true') {
-    location.replace('portal.html?v=20260802-4');
+    location.replace('portal.html?v=20260803-1');
     return;
   }
 
@@ -13,6 +13,7 @@
   document.getElementById('startLogout').addEventListener('click', () => {
     sessionStorage.removeItem(SESSION_KEY);
     sessionStorage.removeItem(COORDINATOR_SESSION_KEY);
-    location.replace('portal.html?v=20260802-4');
+    sessionStorage.removeItem('leap-coordinator-sync-token');
+    location.replace('portal.html?v=20260803-1');
   });
 })();

@@ -1,26 +1,40 @@
-(() => {
+(async () => {
   'use strict';
 
   const SESSION_KEY = 'leap-portal-authenticated';
   const COORDINATOR_SESSION_KEY = 'leap-coordinator-authenticated';
-  const VERSION = '20260802-4';
+  const VERSION = '20260803-1';
 
   if (sessionStorage.getItem(SESSION_KEY) !== 'true') {
     location.replace(`portal.html?v=${VERSION}`);
     return;
   }
-  if (sessionStorage.getItem(COORDINATOR_SESSION_KEY) !== 'true') {
+  if (sessionStorage.getItem(COORDINATOR_SESSION_KEY) !== 'true' || !window.LEAP_PORTAL_STORE.hasCoordinatorToken()) {
     location.replace(`portal-coordinator-login.html?v=${VERSION}`);
     return;
   }
 
-  const data = window.LEAP_PORTAL_STORE.load();
+  const data = await window.LEAP_PORTAL_STORE.load();
   const esc = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
   const personName = id => data.team.find(person => person.id === id)?.name || 'Nieprzypisano';
   const stationName = id => data.stations.find(station => station.id === id)?.name || id;
   const typeLabel = value => value === 'Mixed' ? 'Blok mieszany' : value;
   const formatDate = value => new Intl.DateTimeFormat('pl-PL', { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date(`${value}T12:00:00`));
   const formatShortDate = value => new Intl.DateTimeFormat('pl-PL', { day: '2-digit', month: '2-digit' }).format(new Date(`${value}T12:00:00`));
+  const syncStatus = document.getElementById('coordinatorSyncStatus');
+
+  function renderSyncStatus() {
+    const current = window.LEAP_PORTAL_STORE.getStatus();
+    const updated = current.updatedAt
+      ? new Intl.DateTimeFormat('pl-PL', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(current.updatedAt))
+      : '';
+    syncStatus.textContent = current.online
+      ? current.initialized
+        ? `Wspólne dane aktualne${updated ? ` · ostatnia zmiana ${updated}` : ''}`
+        : 'Wspólne dane oczekują na pierwszy zapis.'
+      : `Brak połączenia · wyświetlam: ${current.source}`;
+    syncStatus.classList.toggle('sync-warning', !current.online);
+  }
 
   const today = new Date().toISOString().slice(0, 10);
   const sortedBlocks = [...data.blocks].sort((a, b) => a.date.localeCompare(b.date));
@@ -58,6 +72,7 @@
 
   document.getElementById('coordinatorLock').addEventListener('click', () => {
     sessionStorage.removeItem(COORDINATOR_SESSION_KEY);
+    window.LEAP_PORTAL_STORE.clearCoordinatorToken();
     location.replace(`portal-start.html?v=${VERSION}`);
   });
 
@@ -65,5 +80,8 @@
     if (event.key === window.LEAP_PORTAL_STORE.storageKey) location.reload();
   });
 
+  window.LEAP_PORTAL_STORE.watch(() => location.reload());
+
   document.documentElement.classList.remove('auth-pending');
+  renderSyncStatus();
 })();

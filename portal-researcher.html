@@ -9,15 +9,15 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Manrope:wght@500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="portal-simple.css?v=20260802-4" />
+  <link rel="stylesheet" href="portal-simple.css?v=20260803-1" />
 </head>
 <body>
   <header class="simple-header">
-    <a class="simple-brand" href="portal-start.html?v=20260802-4"><span aria-hidden="true">L</span>LEAP</a>
+    <a class="simple-brand" href="portal-start.html?v=20260803-1"><span aria-hidden="true">L</span>LEAP</a>
     <div class="header-actions">
-      <a class="header-action-primary" href="portal-training.html?v=20260802-4">Panel treningowy</a>
-      <a class="quiet-link" href="portal-glossary.html?v=20260802-4">Słowniczek</a>
-      <a class="quiet-link" href="portal-start.html?v=20260802-4">Wybór panelu</a>
+      <a class="header-action-primary" href="portal-training.html?v=20260803-1">Panel treningowy</a>
+      <a class="quiet-link" href="portal-glossary.html?v=20260803-1">Słowniczek</a>
+      <a class="quiet-link" href="portal-start.html?v=20260803-1">Wybór panelu</a>
       <button class="quiet-button" id="researcherLogout" type="button">Wyloguj</button>
     </div>
   </header>
@@ -36,6 +36,7 @@
         </select>
       </div>
     </header>
+    <p class="sync-status" id="researcherSyncStatus" role="status" aria-live="polite"></p>
 
     <section class="welcome-card" id="researcherWelcome">
       <h2>Najpierw wybierz siebie</h2>
@@ -65,8 +66,9 @@
     </div>
   </main>
 
-  <script src="portal-data.js?v=20260802-4"></script>
-  <script src="portal-store.js?v=20260802-4"></script>
-  <script src="portal-researcher.js?v=20260802-4"></script>
+  <script src="portal-data.js?v=20260803-1"></script>
+  <script src="portal-sync-config.js?v=20260803-1"></script>
+  <script src="portal-store.js?v=20260803-1"></script>
+  <script src="portal-researcher.js?v=20260803-1"></script>
 </body>
 </html>

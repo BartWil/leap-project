@@ -1,16 +1,17 @@
-(() => {
+(async () => {
   'use strict';
 
   const SESSION_KEY = 'leap-portal-authenticated';
   const COORDINATOR_SESSION_KEY = 'leap-coordinator-authenticated';
-  const VERSION = '20260802-4';
+  const VERSION = '20260803-1';
 
   if (sessionStorage.getItem(SESSION_KEY) !== 'true') {
     location.replace(`portal.html?v=${VERSION}`);
     return;
   }
 
-  const team = window.LEAP_PORTAL_STORE?.load().team || window.LEAP_DEMO_DATA?.team || [];
+  const sharedData = window.LEAP_PORTAL_STORE ? await window.LEAP_PORTAL_STORE.load() : window.LEAP_DEMO_DATA;
+  const team = sharedData?.team || [];
   const guides = window.LEAP_DUTY_GUIDES || {};
   const list = document.getElementById('researcherList');
   const search = document.getElementById('researcherSearch');
@@ -161,6 +162,7 @@
   document.getElementById('dutiesLogout').addEventListener('click', () => {
     sessionStorage.removeItem(SESSION_KEY);
     sessionStorage.removeItem(COORDINATOR_SESSION_KEY);
+    window.LEAP_PORTAL_STORE?.clearCoordinatorToken();
     location.replace(`portal.html?v=${VERSION}`);
   });
 
@@ -168,4 +170,5 @@
   if (requestedPerson) search.value = requestedPerson.name;
   render();
   if (requestedPerson) list.querySelector('details')?.setAttribute('open', '');
+  window.LEAP_PORTAL_STORE?.watch(() => location.reload());
 })();

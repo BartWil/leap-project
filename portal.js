@@ -4,7 +4,7 @@
   const PASSWORD_HASH = 'fa2eb8dbb6273a2d1651d349b10d9e1beff7580bd89381a5b1e0d1a12fdd1b73';
   const SESSION_KEY = 'leap-portal-authenticated';
   const COORDINATOR_SESSION_KEY = 'leap-coordinator-authenticated';
-  const VERSION = '20260802-4';
+  const VERSION = '20260803-1';
   const COORDINATOR_VIEWS = new Set([
     'dashboard', 'participants', 'schedule', 'stations', 'modules', 'team',
     'competencies', 'data-quality', 'documents', 'admin'
@@ -854,6 +854,7 @@
     if (action === 'logout') {
       sessionStorage.removeItem(SESSION_KEY);
       sessionStorage.removeItem(COORDINATOR_SESSION_KEY);
+      sessionStorage.removeItem('leap-coordinator-sync-token');
       location.replace(`portal.html?v=${VERSION}`);
     }
     else if (action === 'create-block') createBlockModal();
@@ -951,6 +952,7 @@
   els.logoutButton.addEventListener('click', () => {
     sessionStorage.removeItem(SESSION_KEY);
     sessionStorage.removeItem(COORDINATOR_SESSION_KEY);
+    sessionStorage.removeItem('leap-coordinator-sync-token');
     location.replace(`portal.html?v=${VERSION}`);
   });
   els.roleSwitcher.addEventListener('change', () => { state.roleId = els.roleSwitcher.value; localStorage.setItem(ROLE_KEY,state.roleId); updateUser(); renderView(); toast(`Aktywna rola demo: ${activeRole().label}`); });

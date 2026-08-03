@@ -1,32 +1,26 @@
-(() => {
+(async () => {
   'use strict';
 
   const SESSION_KEY = 'leap-portal-authenticated';
   const COORDINATOR_SESSION_KEY = 'leap-coordinator-authenticated';
-  const COORDINATOR_PASSWORD_HASH = '03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4';
-  const VERSION = '20260802-4';
+  const VERSION = '20260803-1';
 
   if (sessionStorage.getItem(SESSION_KEY) !== 'true') {
     location.replace(`portal.html?v=${VERSION}`);
     return;
   }
 
-  if (sessionStorage.getItem(COORDINATOR_SESSION_KEY) === 'true') {
+  if (sessionStorage.getItem(COORDINATOR_SESSION_KEY) === 'true' && window.LEAP_PORTAL_STORE.hasCoordinatorToken()) {
     location.replace(`portal-coordinator.html?v=${VERSION}`);
     return;
   }
+  sessionStorage.removeItem(COORDINATOR_SESSION_KEY);
 
   const form = document.getElementById('coordinatorLoginForm');
   const password = document.getElementById('coordinatorPassword');
   const toggle = document.getElementById('coordinatorPasswordToggle');
   const submit = document.getElementById('coordinatorLoginButton');
   const status = document.getElementById('coordinatorLoginStatus');
-
-  async function hashPassword(value) {
-    const bytes = new TextEncoder().encode(value);
-    const digest = await crypto.subtle.digest('SHA-256', bytes);
-    return Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join('');
-  }
 
   form.addEventListener('submit', async event => {
     event.preventDefault();
@@ -40,16 +34,17 @@
     submit.textContent = 'Sprawdzanie…';
     status.textContent = '';
     try {
-      if (await hashPassword(password.value) === COORDINATOR_PASSWORD_HASH) {
-        sessionStorage.setItem(COORDINATOR_SESSION_KEY, 'true');
-        location.replace(`portal-coordinator.html?v=${VERSION}`);
-      } else {
-        status.textContent = 'Nieprawidłowe hasło. Spróbuj ponownie.';
+      await window.LEAP_PORTAL_STORE.authenticateCoordinator(password.value);
+      submit.textContent = 'Łączenie danych…';
+      await window.LEAP_PORTAL_STORE.initializeSharedState();
+      sessionStorage.setItem(COORDINATOR_SESSION_KEY, 'true');
+      location.replace(`portal-coordinator.html?v=${VERSION}`);
+    } catch (error) {
+      status.textContent = error?.message || 'Nie udało się sprawdzić hasła. Odśwież stronę.';
+      if (error?.code === 'invalid_credentials') {
         password.value = '';
         password.focus();
       }
-    } catch {
-      status.textContent = 'Nie udało się sprawdzić hasła. Odśwież stronę.';
     } finally {
       submit.disabled = false;
       submit.textContent = 'Wejdź do panelu';

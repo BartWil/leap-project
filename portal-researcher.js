@@ -1,17 +1,17 @@
-(() => {
+(async () => {
   'use strict';
 
   const SESSION_KEY = 'leap-portal-authenticated';
   const COORDINATOR_SESSION_KEY = 'leap-coordinator-authenticated';
   const RESEARCHER_KEY = 'leap-researcher-id';
-  const VERSION = '20260802-4';
+  const VERSION = '20260803-1';
 
   if (sessionStorage.getItem(SESSION_KEY) !== 'true') {
     location.replace(`portal.html?v=${VERSION}`);
     return;
   }
 
-  const data = window.LEAP_PORTAL_STORE.load();
+  const data = await window.LEAP_PORTAL_STORE.load();
   const select = document.getElementById('researcherSelect');
   const welcome = document.getElementById('researcherWelcome');
   const workspace = document.getElementById('researcherWorkspace');
@@ -20,6 +20,7 @@
   const duties = document.getElementById('researcherDuties');
   const messagesList = document.getElementById('researcherMessages');
   const taskCount = document.getElementById('researcherTaskCount');
+  const syncStatus = document.getElementById('researcherSyncStatus');
 
   const esc = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
   const personName = id => data.team.find(person => person.id === id)?.name || 'Nieprzypisano';
@@ -27,6 +28,19 @@
   const typeLabel = value => value === 'Mixed' ? 'Blok mieszany' : value;
   const formatDate = value => new Intl.DateTimeFormat('pl-PL', { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date(`${value}T12:00:00`));
   const formatShortDate = value => new Intl.DateTimeFormat('pl-PL', { day: '2-digit', month: '2-digit' }).format(new Date(`${value}T12:00:00`));
+
+  function renderSyncStatus() {
+    const current = window.LEAP_PORTAL_STORE.getStatus();
+    const updated = current.updatedAt
+      ? new Intl.DateTimeFormat('pl-PL', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(current.updatedAt))
+      : '';
+    syncStatus.textContent = current.online
+      ? current.initialized
+        ? `Wspólne dane aktualne${updated ? ` · ostatnia zmiana ${updated}` : ''}`
+        : 'Wspólne dane są gotowe do pierwszego zapisu koordynatora.'
+      : `Brak połączenia · wyświetlam: ${current.source}`;
+    syncStatus.classList.toggle('sync-warning', !current.online);
+  }
 
   const activeTeam = data.team.filter(person => person.status !== 'Vacant');
   select.insertAdjacentHTML('beforeend', activeTeam.map(person => `<option value="${esc(person.id)}">${esc(person.name)}</option>`).join(''));
@@ -123,12 +137,15 @@
   document.getElementById('researcherLogout').addEventListener('click', () => {
     sessionStorage.removeItem(SESSION_KEY);
     sessionStorage.removeItem(COORDINATOR_SESSION_KEY);
+    window.LEAP_PORTAL_STORE.clearCoordinatorToken();
     location.replace(`portal.html?v=${VERSION}`);
   });
 
   window.addEventListener('storage', event => {
     if (event.key === window.LEAP_PORTAL_STORE.storageKey) location.reload();
   });
+
+  window.LEAP_PORTAL_STORE.watch(() => location.reload());
 
   const savedPerson = localStorage.getItem(RESEARCHER_KEY);
   if (activeTeam.some(person => person.id === savedPerson)) {
@@ -137,4 +154,5 @@
   }
 
   document.documentElement.classList.remove('auth-pending');
+  renderSyncStatus();
 })();

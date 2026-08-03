@@ -280,6 +280,32 @@ button, a { -webkit-tap-highlight-color: transparent; }
   font-weight: 700;
 }
 
+.sync-status {
+  margin: -12px 0 24px;
+  color: #315c4b;
+  font-size: .8rem;
+  font-weight: 600;
+}
+
+.sync-status::before {
+  content: '';
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 7px;
+  border-radius: 50%;
+  background: #66a685;
+  vertical-align: 1px;
+}
+
+.sync-status.sync-warning {
+  color: #8a4c22;
+}
+
+.sync-status.sync-warning::before {
+  background: #d08b45;
+}
+
 .edit-panel {
   padding: clamp(26px, 5vw, 46px);
   border: 1px solid var(--line);

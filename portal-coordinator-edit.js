@@ -1,20 +1,20 @@
-(() => {
+(async () => {
   'use strict';
 
   const SESSION_KEY = 'leap-portal-authenticated';
   const COORDINATOR_SESSION_KEY = 'leap-coordinator-authenticated';
-  const VERSION = '20260802-4';
+  const VERSION = '20260803-1';
 
   if (sessionStorage.getItem(SESSION_KEY) !== 'true') {
     location.replace(`portal.html?v=${VERSION}`);
     return;
   }
-  if (sessionStorage.getItem(COORDINATOR_SESSION_KEY) !== 'true') {
+  if (sessionStorage.getItem(COORDINATOR_SESSION_KEY) !== 'true' || !window.LEAP_PORTAL_STORE.hasCoordinatorToken()) {
     location.replace(`portal-coordinator-login.html?v=${VERSION}`);
     return;
   }
 
-  let data = window.LEAP_PORTAL_STORE.load();
+  let data = await window.LEAP_PORTAL_STORE.load();
   const status = document.getElementById('editStatus');
   const notificationQueueStatus = document.getElementById('notificationQueueStatus');
   const activeTeam = data.team.filter(person => person.status !== 'Vacant');
@@ -23,12 +23,29 @@
   const typeLabel = value => value === 'Mixed' ? 'Blok mieszany' : value;
   const formatDate = value => value ? new Intl.DateTimeFormat('pl-PL', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date(`${value}T12:00:00`)) : 'bez terminu';
 
-  function save(message) {
-    window.LEAP_PORTAL_STORE.save(data);
-    renderNotificationQueue();
-    status.textContent = message;
-    clearTimeout(save.timeout);
-    save.timeout = setTimeout(() => { status.textContent = ''; }, 4000);
+  async function save(message) {
+    const buttons = [...document.querySelectorAll('.form-submit, .form-delete, .row-action')];
+    buttons.forEach(button => { button.disabled = true; });
+    status.textContent = 'Zapisywanie we wspólnym arkuszu…';
+    try {
+      await window.LEAP_PORTAL_STORE.save(data);
+      renderNotificationQueue();
+      status.textContent = message;
+      clearTimeout(save.timeout);
+      save.timeout = setTimeout(() => { status.textContent = ''; }, 5000);
+      return true;
+    } catch (error) {
+      status.textContent = error?.message || 'Nie udało się zapisać zmiany.';
+      if (error?.code === 'unauthorized') {
+        sessionStorage.removeItem(COORDINATOR_SESSION_KEY);
+        setTimeout(() => location.replace(`portal-coordinator-login.html?v=${VERSION}`), 1800);
+      } else {
+        setTimeout(() => location.reload(), 2500);
+      }
+      return false;
+    } finally {
+      buttons.forEach(button => { button.disabled = false; });
+    }
   }
 
   function renderNotificationQueue() {
@@ -218,7 +235,7 @@
   });
   document.getElementById('dutiesPerson').addEventListener('change', fillDuties);
 
-  document.getElementById('dayForm').addEventListener('submit', event => {
+  document.getElementById('dayForm').addEventListener('submit', async event => {
     event.preventDefault();
     const editing = dayAction.value === 'edit';
     let block = editing ? data.blocks.find(item => item.id === dayBlock.value) : null;
@@ -245,17 +262,17 @@
     block.invitedMemberIds = selectedInviteIds();
     block.notes = document.getElementById('dayNote').value.trim();
     queueDayNotifications(previousBlock, block);
-    save(editing ? 'Zapisano zmiany dnia badawczego.' : 'Dodano nowy dzień badawczy.');
+    if (!await save(editing ? 'Zapisano zmiany dnia badawczego.' : 'Dodano nowy dzień badawczy.')) return;
     refreshDayOptions(block.id);
     dayAction.value = 'edit';
     updateDayMode();
   });
 
-  dayDelete.addEventListener('click', () => {
+  dayDelete.addEventListener('click', async () => {
     const block = data.blocks.find(item => item.id === dayBlock.value);
     if (!block || !confirm(`Usunąć dzień ${formatDate(block.date)} (${typeLabel(block.type)})?`)) return;
     data.blocks = data.blocks.filter(item => item.id !== block.id);
-    save('Usunięto dzień badawczy.');
+    if (!await save('Usunięto dzień badawczy.')) return;
     refreshDayOptions();
     if (data.blocks.length) {
       dayAction.value = 'edit';
@@ -266,7 +283,7 @@
     }
   });
 
-  document.getElementById('taskForm').addEventListener('submit', event => {
+  document.getElementById('taskForm').addEventListener('submit', async event => {
     event.preventDefault();
     data.tasks.push({
       id: `task-${Date.now()}`,
@@ -278,21 +295,21 @@
       status: 'Open',
       targetView: 'dashboard'
     });
+    if (!await save('Dodano zadanie. Badacz zobaczy je w swoim panelu.')) return;
     event.target.reset();
-    save('Dodano zadanie. Badacz zobaczy je w swoim panelu.');
     renderTasks();
   });
 
-  document.getElementById('dutiesForm').addEventListener('submit', event => {
+  document.getElementById('dutiesForm').addEventListener('submit', async event => {
     event.preventDefault();
     const person = data.team.find(item => item.id === document.getElementById('dutiesPerson').value);
     if (!person) return;
     person.notesPublic = document.getElementById('dutiesSummary').value.trim();
     person.responsibilities = document.getElementById('dutiesList').value.split('\n').map(item => item.trim()).filter(Boolean);
-    save(`Zapisano obowiązki: ${person.name}.`);
+    await save(`Zapisano obowiązki: ${person.name}.`);
   });
 
-  document.getElementById('messageForm').addEventListener('submit', event => {
+  document.getElementById('messageForm').addEventListener('submit', async event => {
     event.preventDefault();
     data.coordinatorMessages ||= [];
     const message = {
@@ -311,24 +328,24 @@
       text: message.text,
       expiresDate: message.expiresDate
     });
+    if (!await save('Opublikowano komunikat. Powiadomienie e-mail dodano do kolejki.')) return;
     event.target.reset();
-    save('Opublikowano komunikat. Powiadomienie e-mail dodano do kolejki.');
     renderMessages();
   });
 
-  document.addEventListener('click', event => {
+  document.addEventListener('click', async event => {
     const taskButton = event.target.closest('[data-complete-task]');
     if (taskButton) {
       const task = data.tasks.find(item => item.id === taskButton.dataset.completeTask);
       if (task) task.status = 'Completed';
-      save('Zadanie oznaczono jako zakończone.');
+      if (!await save('Zadanie oznaczono jako zakończone.')) return;
       renderTasks();
       return;
     }
     const messageButton = event.target.closest('[data-remove-message]');
     if (messageButton) {
       data.coordinatorMessages = (data.coordinatorMessages || []).filter(item => item.id !== messageButton.dataset.removeMessage);
-      save('Usunięto komunikat.');
+      if (!await save('Usunięto komunikat.')) return;
       renderMessages();
     }
   });
