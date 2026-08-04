@@ -9,21 +9,21 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Manrope:wght@500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="portal-simple.css?v=20260803-1" />
-  <link rel="stylesheet" href="portal-training.css?v=20260803-1" />
+  <link rel="stylesheet" href="portal-simple.css?v=20260804-1" />
+  <link rel="stylesheet" href="portal-training.css?v=20260804-1" />
 </head>
 <body>
   <header class="simple-header">
-    <a class="simple-brand" href="portal-training.html?v=20260803-1"><span aria-hidden="true">L</span>LEAP</a>
+    <a class="simple-brand" href="portal-training.html?v=20260804-1"><span aria-hidden="true">L</span>LEAP</a>
     <div class="header-actions">
-      <a class="quiet-link" href="portal-glossary.html?v=20260803-1">Słowniczek</a>
-      <a class="quiet-link" href="portal-training.html?v=20260803-1">Panel treningowy</a>
+      <a class="quiet-link" href="portal-glossary.html?v=20260804-1">Słowniczek</a>
+      <a class="quiet-link" href="portal-training.html?v=20260804-1">Panel treningowy</a>
       <button class="quiet-button" type="button" data-training-logout>Wyloguj</button>
     </div>
   </header>
 
   <main class="simple-main training-main protocol-main">
-    <a class="protocol-back" href="portal-training.html?v=20260803-1">← Wszystkie materiały</a>
+    <a class="protocol-back" href="portal-training.html?v=20260804-1">← Wszystkie materiały</a>
 
     <header class="simple-intro training-intro protocol-intro">
       <div>
@@ -43,7 +43,7 @@
         <p class="eyebrow">Zanim uruchomisz test</p>
         <h2 id="openCapWarmupTitle">Najpierw ustandaryzowana rozgrzewka</h2>
         <p>Rozgrzewka jest obowiązkowa przed OpenCap i HHD. Otwórz instrukcję, wykonaj pełne 8–10 minut i dopiero wtedy rozpocznij nagrania.</p>
-        <a class="warmup-link" href="portal-training-warmup.html?v=20260803-1">Otwórz rozgrzewkę →</a>
+        <a class="warmup-link" href="portal-training-warmup.html?v=20260804-1">Otwórz rozgrzewkę →</a>
       </div>
     </section>
 
@@ -60,7 +60,7 @@
         <article>
           <span>Kamera 01</span>
           <strong>iPhone · stojak</strong>
-          <small>Widok skośny z lewej strony, około 30–45°.</small>
+          <small>Widok skośny z lewej strony, około 30–45°. Nagrywa kamera tylna.</small>
         </article>
         <div class="camera-subject">
           <span aria-hidden="true">●</span>
@@ -70,27 +70,54 @@
         <article>
           <span>Kamera 02</span>
           <strong>iPhone · stojak</strong>
-          <small>Widok skośny z prawej strony, około 30–45°.</small>
+          <small>Widok skośny z prawej strony, około 30–45°. Nagrywa kamera tylna.</small>
         </article>
         <article class="camera-front">
           <span>Kamera 03 · frontalna</span>
           <strong>iPad · stabilne krzesło lub uchwyt</strong>
-          <small>Dokładnie naprzeciwko uczestnika. Nie trzymaj urządzenia w ręku.</small>
+          <small>Dokładnie naprzeciwko uczestnika. Użyj kamery tylnej i nie trzymaj urządzenia w ręku.</small>
         </article>
       </div>
 
-      <p class="device-note"><strong>Sprzęt:</strong> dwa iPhone’y są podstawą stanowiska; jeden iPad tworzy widok frontalny, a drugi pozostaje w rezerwie. Wszystkie urządzenia muszą być nieruchome i widzieć całe ciało. OpenCap obsługuje iPhone’y i iPady wydane w 2018 roku lub później.</p>
+      <p class="device-note"><strong>Sprzęt:</strong> dwa iPhone’y są podstawą stanowiska; jeden iPad tworzy widok frontalny, a drugi pozostaje w rezerwie. OpenCap nagrywa kamerą tylną urządzenia. Wszystkie urządzenia muszą być nieruchome i widzieć całe ciało. OpenCap obsługuje iPhone’y i iPady wydane w 2018 roku lub później.</p>
+    </section>
+
+    <section class="protocol-start-grid opencap-preflight" aria-label="Kontrola stanowiska przed kalibracją">
+      <article class="protocol-start-card card-sage">
+        <p class="eyebrow">60 sekund przed kalibracją</p>
+        <h2>Sprawdź połączenie i obraz</h2>
+        <ul class="check-list">
+          <li>każde urządzenie potwierdziło połączenie po zeskanowaniu kodu QR,</li>
+          <li>na ekranie iPhone’a lub iPada nie ma czerwonego komunikatu o braku połączenia,</li>
+          <li>internet jest stabilny, a w tle nie przemieszczają się inne osoby,</li>
+          <li>uczestnik wykonuje po jednym pełnym ruchu SLS, CMJ i side hop w podglądzie każdej kamery.</li>
+        </ul>
+      </article>
+
+      <article class="protocol-start-card">
+        <p class="eyebrow">Zasada widoczności</p>
+        <h2>Dwie kamery widzą każdy segment</h2>
+        <ul class="check-list">
+          <li>każda część ciała jest widoczna przez co najmniej dwie kamery przez cały ruch,</li>
+          <li>uczestnik nie wychodzi i nie wraca do wspólnej przestrzeni rejestracji,</li>
+          <li>dla side hopu w obrazie mieści się pozycja startowa, cel i lądowanie po powrocie,</li>
+          <li>jeśli występuje zasłonięcie kończyny, popraw ustawienie teraz — przed kalibracją.</li>
+        </ul>
+      </article>
     </section>
 
     <section class="training-video-card calibration-video-card" aria-labelledby="calibrationVideoTitle">
       <div class="training-video-copy">
         <p class="eyebrow">Krótki film stanowiskowy</p>
         <h2 id="calibrationVideoTitle">Kartka A4 do kalibracji kamer</h2>
-        <p>Film pokazuje, jak równo przymocować kartkę A4 używaną podczas kalibracji. Kartka ma być płaska, ustawiona prosto i nieruchoma — bez przechylenia oraz zagięć.</p>
+        <p>Film pokazuje, jak równo przymocować planszę szachownicową używaną podczas kalibracji. Wydruk ma mieć co najmniej format A4, białe obramowanie i pola o boku co najmniej 35 mm. Plansza ma być płaska, ustawiona prosto i nieruchoma — bez przechylenia oraz zagięć.</p>
         <ul class="check-list">
-          <li>przyklej kartkę równo do stabilnej, pionowej powierzchni,</li>
+          <li>po wydrukowaniu zmierz linijką bok pola i potwierdź rzeczywisty wymiar,</li>
+          <li>w aplikacji wpisz liczbę narożników „czarne–czarne”, a nie liczbę pól,</li>
+          <li>przyklej planszę równo do stabilnej, pionowej powierzchni; dłuższa krawędź jest poziomo,</li>
           <li>sprawdź, czy cała kartka jest widoczna w każdym z trzech ujęć,</li>
-          <li>nie zmieniaj ustawienia kamer po wykonaniu kalibracji.</li>
+          <li>ustaw ją bliżej niż 5 m od kamer i nie kieruj jej prostopadle wprost na jedną kamerę,</li>
+          <li>po udanej kalibracji usuń planszę i nie zmieniaj ustawienia kamer.</li>
         </ul>
       </div>
       <figure class="training-video-frame">
@@ -102,6 +129,26 @@
       </figure>
     </section>
 
+    <section class="training-video-card operator-training-card" aria-labelledby="operatorTrainingTitle">
+      <div class="training-video-copy">
+        <p class="eyebrow">Film dla operatora</p>
+        <h2 id="operatorTrainingTitle">Obsługa sesji w aplikacji OpenCap</h2>
+        <p>Obejrzyj film przed pierwszym samodzielnym badaniem. Pokazuje pracę operatora w aplikacji — od wejścia do systemu do prowadzenia sesji.</p>
+        <ul class="check-list">
+          <li>zwróć uwagę na kolejność działań na laptopie,</li>
+          <li>zatrzymuj film i porównuj ekran z aktualną wersją aplikacji,</li>
+          <li>nazwy prób i zadania wykonuj według protokołu LEAP opisanego niżej.</li>
+        </ul>
+      </div>
+      <figure class="training-video-frame">
+        <video class="training-video" controls preload="metadata" playsinline aria-label="Film szkoleniowy dla operatora sesji OpenCap">
+          <source src="assets/training/OpenCap_operator_training.mp4" type="video/mp4" />
+          Twoja przeglądarka nie obsługuje odtwarzania filmu MP4.
+        </video>
+        <figcaption>Materiał operatorski OpenCap · 2 min 49 s. Wygląd aplikacji może zmieniać się wraz z aktualizacjami.</figcaption>
+      </figure>
+    </section>
+
     <section class="protocol-start-grid" aria-label="Przygotowanie stanowiska OpenCap">
       <article class="protocol-start-card card-sage">
         <p class="eyebrow">Przygotuj</p>
@@ -110,7 +157,7 @@
           <li>dwa iPhone’y, iPad frontalny i zapasowy iPad,</li>
           <li>dwa stojaki oraz stabilne krzesło lub trzeci uchwyt,</li>
           <li>laptop z aplikacją internetową OpenCap,</li>
-          <li>pionową planszę kalibracyjną,</li>
+          <li>pionową planszę szachownicową co najmniej A4 oraz linijkę do kontroli pól,</li>
           <li>oznaczenia na podłodze i stabilne połączenie z internetem.</li>
         </ul>
       </article>
@@ -140,8 +187,8 @@
       <ol class="opencap-flow">
         <li><span>01</span><div><strong>Rozstaw urządzenia.</strong><p>Użyj taśm na podłodze. Sprawdź w każdym podglądzie, czy całe ciało pozostaje widoczne podczas wszystkich zadań.</p></div></li>
         <li><span>02</span><div><strong>Połącz urządzenia.</strong><p>Najpierw połącz wszystkie trzy urządzenia z sesją OpenCap, a dopiero potem zamocuj je stabilnie na stojakach i krześle lub uchwycie.</p></div></li>
-        <li><span>03</span><div><strong>Ustaw planszę.</strong><p>Umieść planszę w środku przestrzeni pomiarowej, możliwie pionowo i w polu widzenia wszystkich kamer.</p></div></li>
-        <li><span>04</span><div><strong>Wykonaj kalibrację.</strong><p>Uruchom konfigurację na laptopie i nie dotykaj kamer po jej zakończeniu. Przesunięcie urządzenia oznacza konieczność nowej kalibracji.</p></div></li>
+        <li><span>03</span><div><strong>Ustaw planszę.</strong><p>Umieść ją w środku przestrzeni pomiarowej, prostopadle do podłogi, z dłuższą krawędzią poziomo i w polu widzenia wszystkich kamer. Plansza nie może być skierowana wprost na jedną kamerę.</p></div></li>
+        <li><span>04</span><div><strong>Wykonaj kalibrację.</strong><p>Sprawdź wymiar pól i liczbę narożników „czarne–czarne”, uruchom konfigurację na laptopie i nie dotykaj kamer po jej zakończeniu. Przesunięcie urządzenia oznacza konieczność nowej kalibracji.</p></div></li>
         <li><span>05</span><div><strong>Wpisz dane kodowane.</strong><p>Utwórz uczestnika, używając wyłącznie kodu, np. B001. Wpisz masę, wzrost i rok urodzenia zgodne z pomiarami.</p></div></li>
         <li><span>06</span><div><strong>Nagraj Neutral.</strong><p>Uczestnik stoi nieruchomo. Sprawdź, czy nie pochyla się w przód ani w tył oraz czy szkielet jest kompletny we wszystkich widokach.</p></div></li>
       </ol>
@@ -150,7 +197,7 @@
     <section class="recording-command" aria-labelledby="recordingCommandTitle">
       <p class="eyebrow">Ta sama komenda w każdym nagraniu</p>
       <h2 id="recordingCommandTitle">„Pozycja” → START → „3, 2, 1” → ruch około 0:02</h2>
-      <p>Najpierw uczestnik przyjmuje pozycję startową. Operator uruchamia nagrywanie i odlicza. Ruch powinien rozpocząć się około dwóch sekund po starcie zapisu.</p>
+      <p>Najpierw uczestnik przyjmuje pozycję startową. Operator uruchamia nagrywanie i odlicza. Ruch powinien rozpocząć się około dwóch sekund po starcie zapisu — oficjalne minimum OpenCap to co najmniej jedna sekunda zapisu przed ruchem.</p>
     </section>
 
     <section class="test-section" aria-labelledby="openCapTasksTitle">
@@ -203,7 +250,7 @@
           </summary>
           <div class="procedure-body">
             <ol class="procedure-steps">
-              <li><strong>Załóż buty i ustaw cel.</strong><span>Cel znajduje się około 0,5 m bocznie od pozycji startowej.</span></li>
+              <li><strong>Załóż buty i ustaw cel.</strong><span>Cel znajduje się około 0,5 m bocznie od pozycji startowej. Cały tor skoku musi pozostawać we wspólnym polu widzenia co najmniej dwóch kamer.</span></li>
               <li><strong>Wyjaśnij ruch.</strong><span>Stojąc na badanej nodze, uczestnik skacze w bok w kierunku tej strony, po czym szybko i mocno odbija się z powrotem.</span></li>
               <li><strong>Pilnuj kryteriów.</strong><span>Dłonie cały czas pozostają na biodrach. Po powrocie uczestnik utrzymuje równowagę na nodze podporowej.</span></li>
               <li><strong>Wykonaj próbę zapoznawczą.</strong><span>Jedna próba nie jest nagrywana.</span></li>
@@ -237,10 +284,59 @@
           <li>upewnij się, że wszystkie wymagane próby są zapisane,</li>
           <li>sprawdź poprawność nazw prób P i L,</li>
           <li>kliknij „New Session”,</li>
-          <li>zgodnie z instrukcją LEAP ponownie ustaw planszę i wykonaj kalibrację,</li>
+          <li>zgodnie z aktualną instrukcją LEAP ponownie ustaw planszę i wykonaj kalibrację,</li>
           <li>jeżeli któraś kamera została przesunięta — kalibracja jest obowiązkowa,</li>
           <li>dla nowego uczestnika użyj wyłącznie jego kodu.</li>
         </ul>
+        <p class="record-note"><strong>Nie wybieraj samodzielnie „New session same setup”.</strong> OpenCap dopuszcza tę opcję, gdy układ kamer nie zmienił się ani o milimetr, jednak obecny standard LEAP wymaga ponownej kalibracji przed kolejnym uczestnikiem. Zmianę tej zasady może zatwierdzić tylko koordynator.</p>
+      </div>
+    </section>
+
+    <section class="opencap-flow-section" aria-labelledby="openCapTroubleshootingTitle">
+      <div class="training-section-heading">
+        <div>
+          <p class="eyebrow">Gdy coś nie działa</p>
+          <h2 id="openCapTroubleshootingTitle">Szybkie rozwiązywanie problemów</h2>
+        </div>
+        <small>popraw przyczynę, nie tylko powtarzaj</small>
+      </div>
+
+      <div class="test-list opencap-troubleshooting">
+        <details class="calculation-note">
+          <summary>Kalibracja nie przechodzi</summary>
+          <div>
+            <ul class="check-list">
+              <li>sprawdź, czy wszystkie urządzenia są połączone i nie pokazują czerwonego ostrzeżenia,</li>
+              <li>potwierdź wymiar pól oraz liczbę narożników „czarne–czarne”,</li>
+              <li>zbliż planszę na mniej niż 5 m i pokaż ją w całości każdej kamerze,</li>
+              <li>usuń zagięcia, popraw światło i unikaj ostrego kąta planszy względem kamer.</li>
+            </ul>
+          </div>
+        </details>
+
+        <details class="calculation-note">
+          <summary>Neutral jest błędny lub szkielet jest niepełny</summary>
+          <div>
+            <ul class="check-list">
+              <li>uczestnik stoi nieruchomo w pozycji pokazanej w aplikacji aż do komunikatu końcowego,</li>
+              <li>całe ciało jest widoczne przez co najmniej dwie kamery,</li>
+              <li>kamery pokazują obie strony ciała bez zasłaniania kończyn,</li>
+              <li>jeśli model ma złe długości segmentów lub nadal się przechyla — rozpocznij nową sesję i skalibruj ponownie.</li>
+            </ul>
+          </div>
+        </details>
+
+        <details class="calculation-note">
+          <summary>Próba jest ucięta, czerwona lub ruch wygląda niewiarygodnie</summary>
+          <div>
+            <ul class="check-list">
+              <li>sprawdź, czy pola widzenia kamer nakładają się przez cały ruch,</li>
+              <li>usuń zasłonięcia — każdy segment musi widzieć co najmniej para kamer,</li>
+              <li>popraw kontrast ubrania, obuwia, podłogi i tła,</li>
+              <li>jeżeli kamera drgnęła albo jakość pozostaje zła — wykonaj nową kalibrację i nagraj próbę ponownie.</li>
+            </ul>
+          </div>
+        </details>
       </div>
     </section>
 
@@ -261,13 +357,13 @@
       <div>
         <p>Protokół LEAP opracowano częściowo na podstawie publikacji Lima i wsp. (2024): <a href="https://doi.org/10.1080/02640414.2024.2415233" target="_blank" rel="noopener noreferrer">Validity and reliability of trunk and lower-limb kinematics…</a></p>
         <p>Publikacja wskazuje, że trafność i rzetelność OpenCap zależą od zadania i analizowanego stawu. Wyników nie należy traktować jako jednakowo dokładnych dla wszystkich kątów i wszystkich ruchów.</p>
-        <p>Aktualne informacje o urządzeniach i ustawieniu kamer: <a href="https://www.opencap.ai/get-started" target="_blank" rel="noopener noreferrer">OpenCap — Get Started</a> oraz <a href="https://www.opencap.ai/best-practices" target="_blank" rel="noopener noreferrer">OpenCap — Best Practices</a>.</p>
+        <p>Aktualne informacje o urządzeniach, ustawieniu kamer i błędach: <a href="https://www.opencap.ai/get-started" target="_blank" rel="noopener noreferrer">OpenCap — Get Started</a>, <a href="https://www.opencap.ai/best-practices" target="_blank" rel="noopener noreferrer">OpenCap — Best Practices</a> oraz <a href="https://www.opencap.ai/troubleshooting" target="_blank" rel="noopener noreferrer">OpenCap — Troubleshooting</a>.</p>
       </div>
     </details>
 
     <p class="training-footnote">W razie rozbieżności obowiązuje zatwierdzony protokół LEAP i decyzja osoby prowadzącej część kliniczną.</p>
   </main>
 
-  <script src="portal-training.js?v=20260803-1"></script>
+  <script src="portal-training.js?v=20260804-1"></script>
 </body>
 </html>

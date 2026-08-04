@@ -369,6 +369,9 @@
 .calibration-video-card .training-video { aspect-ratio: 9 / 16; }
 .calibration-video-card figure { margin: 0; }
 .calibration-video-card figcaption { color: var(--muted); font-size: 11px; }
+.opencap-preflight { margin-top: 18px; }
+.operator-training-card .training-video { width: 100%; max-width: 520px; aspect-ratio: 1638 / 1020; }
+.operator-training-card figcaption { color: var(--muted); font-size: 11px; line-height: 1.45; }
 
 .warmup-video-link {
   display: grid;
@@ -485,6 +488,7 @@
 .status-grid strong { font: 600 17px var(--display); }
 .status-grid p { margin: 8px 0 0; color: var(--muted); font-size: 12px; line-height: 1.55; }
 .source-note a { color: var(--ink); font-weight: 700; }
+.opencap-troubleshooting .calculation-note { margin-top: 0; border-top: 0; }
 
 @media (max-width: 760px) {
   .visit-overview,
