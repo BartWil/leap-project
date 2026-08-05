@@ -315,7 +315,7 @@
         invalid_email_draft: 'Uzupełnij odbiorców, temat i treść wiadomości.',
         missing_contacts: 'Nie wszystkie wybrane osoby mają zapisany adres e-mail.',
         mail_quota_exceeded: 'Dzisiejszy limit wysyłki Google został wyczerpany.',
-        mail_send_failed: 'Google nie wysłał wiadomości. Sprawdź uprawnienia MailApp i konto wdrożenia.'
+        mail_send_failed: 'Google nie potwierdził wysyłki. Najpierw sprawdź skrzynkę projektu i nie klikaj ponownie, aby uniknąć duplikatu.'
       };
       const error = new Error(messages[result?.error] || 'Nie udało się wysłać wiadomości.');
       error.code = result?.error || 'mail_send_failed';
