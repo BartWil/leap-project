@@ -141,6 +141,16 @@ button, a { -webkit-tap-highlight-color: transparent; }
 
 .welcome-card h2 { margin: 0 0 10px; font: 600 28px var(--display); letter-spacing: -0.035em; }
 .welcome-card p { margin: 0; color: var(--muted); line-height: 1.6; }
+.researcher-floor-plan-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 30px;
+  margin-bottom: 18px;
+  background: var(--blue);
+}
+.researcher-floor-plan-card .eyebrow { margin-bottom: 7px; }
+.researcher-floor-plan-card .primary-link { margin-top: 0; white-space: nowrap; }
 
 .simple-grid {
   display: grid;
@@ -408,6 +418,8 @@ button, a { -webkit-tap-highlight-color: transparent; }
   .identity-field { width: 100%; }
   .simple-grid { grid-template-columns: 1fr; }
   .simple-card.card-wide { grid-column: auto; }
+  .researcher-floor-plan-card { grid-template-columns: 1fr; align-items: start; }
+  .researcher-floor-plan-card .primary-link { justify-self: start; white-space: normal; }
   .edit-tabs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .edit-tabs button:nth-child(2) { border-right: 0; }
   .edit-tabs button:nth-child(-n+2) { border-bottom: 1px solid var(--ink); }

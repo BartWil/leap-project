@@ -4,7 +4,7 @@
   const PASSWORD_HASH = 'fa2eb8dbb6273a2d1651d349b10d9e1beff7580bd89381a5b1e0d1a12fdd1b73';
   const SESSION_KEY = 'leap-portal-authenticated';
   const COORDINATOR_SESSION_KEY = 'leap-coordinator-authenticated';
-  const VERSION = '20260804-1';
+  const VERSION = '20260805-2';
   const COORDINATOR_VIEWS = new Set([
     'dashboard', 'participants', 'schedule', 'stations', 'modules', 'team',
     'competencies', 'data-quality', 'documents', 'admin'
