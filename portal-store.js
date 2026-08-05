@@ -287,6 +287,44 @@
     return clone(confirmed);
   }
 
+  async function sendEmail(draft) {
+    const token = coordinatorToken();
+    if (!token) {
+      const error = new Error('Sesja koordynatora wygasła. Zaloguj się ponownie.');
+      error.code = 'unauthorized';
+      throw error;
+    }
+
+    const id = requestId();
+    await post({
+      action: 'send-email',
+      requestId: id,
+      token,
+      clientMessageId: String(draft.clientMessageId || ''),
+      recipientIds: Array.isArray(draft.recipientIds) ? draft.recipientIds : [],
+      subject: String(draft.subject || ''),
+      body: String(draft.body || ''),
+      category: String(draft.category || 'general'),
+      isTest: draft.isTest === true
+    });
+    const result = await waitForStatus('operation-status', id);
+    if (!result?.ok) {
+      if (result?.error === 'unauthorized') clearCoordinatorToken();
+      const messages = {
+        unauthorized: 'Sesja koordynatora wygasła. Zaloguj się ponownie.',
+        invalid_email_draft: 'Uzupełnij odbiorców, temat i treść wiadomości.',
+        missing_contacts: 'Nie wszystkie wybrane osoby mają zapisany adres e-mail.',
+        mail_quota_exceeded: 'Dzisiejszy limit wysyłki Google został wyczerpany.',
+        mail_send_failed: 'Google nie wysłał wiadomości. Sprawdź uprawnienia MailApp i konto wdrożenia.'
+      };
+      const error = new Error(messages[result?.error] || 'Nie udało się wysłać wiadomości.');
+      error.code = result?.error || 'mail_send_failed';
+      error.missingRecipientIds = Array.isArray(result?.missingRecipientIds) ? result.missingRecipientIds : [];
+      throw error;
+    }
+    return result;
+  }
+
   async function initializeSharedState() {
     const remote = await fetchRemoteState();
     rememberState(remote);
@@ -332,6 +370,7 @@
   window.LEAP_PORTAL_STORE = {
     load,
     save,
+    sendEmail,
     watch,
     getStatus,
     isConfigured,

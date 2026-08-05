@@ -3,7 +3,7 @@
 
   const SESSION_KEY = 'leap-portal-authenticated';
   const COORDINATOR_SESSION_KEY = 'leap-coordinator-authenticated';
-  const VERSION = '20260805-2';
+  const VERSION = '20260805-3';
 
   if (sessionStorage.getItem(SESSION_KEY) !== 'true') {
     location.replace(`portal.html?v=${VERSION}`);
@@ -16,7 +16,6 @@
 
   let data = await window.LEAP_PORTAL_STORE.load();
   const status = document.getElementById('editStatus');
-  const notificationQueueStatus = document.getElementById('notificationQueueStatus');
   const activeTeam = data.team.filter(person => person.status !== 'Vacant');
   const esc = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
   const personName = id => data.team.find(person => person.id === id)?.name || 'Nieprzypisano';
@@ -29,7 +28,6 @@
     status.textContent = 'Zapisywanie we wspólnym arkuszu…';
     try {
       await window.LEAP_PORTAL_STORE.save(data);
-      renderNotificationQueue();
       status.textContent = message;
       clearTimeout(save.timeout);
       save.timeout = setTimeout(() => { status.textContent = ''; }, 5000);
@@ -48,62 +46,133 @@
     }
   }
 
-  function renderNotificationQueue() {
-    const pending = (data.notificationOutbox || []).filter(item => item.status === 'waiting-for-mail-service').length;
-    notificationQueueStatus.textContent = pending
-      ? `Powiadomienia e-mail: ${pending} ${pending === 1 ? 'zdarzenie oczekuje' : 'zdarzeń oczekuje'} na podłączenie prywatnej skrzynki nadawczej.`
-      : 'Powiadomienia e-mail: kolejka jest gotowa, ale prywatna skrzynka nadawcza nie została jeszcze podłączona.';
+  const mailComposer = document.getElementById('mailComposer');
+  const mailRecipients = document.getElementById('mailRecipients');
+  const mailRecipientSummary = document.getElementById('mailRecipientSummary');
+  const mailSubject = document.getElementById('mailSubject');
+  const mailBody = document.getElementById('mailBody');
+  const mailSendStatus = document.getElementById('mailSendStatus');
+  const mailSend = document.getElementById('mailSend');
+  const mailTest = document.getElementById('mailTest');
+  let currentMailDraft = null;
+
+  function newMailId(prefix) {
+    const random = crypto.getRandomValues(new Uint32Array(2));
+    return `${prefix}-${Date.now()}-${Array.from(random, value => value.toString(16)).join('')}`;
   }
 
-  function queueNotification(eventType, recipientIds, payload) {
-    const recipients = [...new Set(recipientIds.filter(Boolean))];
-    if (!recipients.length) return;
-    data.notificationOutbox ||= [];
-    data.notificationOutbox.unshift({
-      id: `notification-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-      eventType,
-      recipientIds: recipients,
-      payload,
-      createdAt: new Date().toISOString(),
-      status: 'waiting-for-mail-service'
-    });
+  function selectedMailRecipientIds() {
+    return [...mailRecipients.querySelectorAll('input[type="checkbox"]:checked')].map(input => input.value);
   }
 
-  function dayNotificationPayload(block) {
+  function updateMailRecipientSummary() {
+    const count = selectedMailRecipientIds().length;
+    mailRecipientSummary.textContent = count
+      ? `Wiadomość otrzyma ${count} ${count === 1 ? 'osoba' : count < 5 ? 'osoby' : 'osób'}.`
+      : 'Wybierz co najmniej jednego odbiorcę.';
+  }
+
+  function openMailComposer(draft) {
+    currentMailDraft = { ...draft, sent: false };
+    const selected = new Set(draft.recipientIds || []);
+    mailRecipients.innerHTML = activeTeam.map(person => `<label class="mail-recipient-option"><input type="checkbox" value="${esc(person.id)}" ${selected.has(person.id) ? 'checked' : ''} /><span>${esc(person.name)}</span></label>`).join('');
+    mailSubject.value = draft.subject;
+    mailBody.value = draft.body;
+    mailSendStatus.textContent = '';
+    mailSend.disabled = false;
+    mailTest.disabled = false;
+    updateMailRecipientSummary();
+    mailComposer.showModal();
+  }
+
+  function closeMailComposer() {
+    if (mailComposer.open) mailComposer.close();
+    currentMailDraft = null;
+  }
+
+  function dayMailDraft(previousBlock, block) {
+    const currentIds = block.invitedMemberIds || [];
+    const previousIds = previousBlock?.invitedMemberIds || [];
+    const recipientIds = [...new Set([...currentIds, ...previousIds])];
+    const isUpdate = Boolean(previousBlock);
+    const currentNames = currentIds.map(personName).join(', ');
+    const title = isUpdate ? 'zmiana dnia badawczego' : 'nowy dzień badawczy';
+    const body = [
+      'Dzień dobry,',
+      '',
+      isUpdate ? 'Zaktualizowaliśmy informacje dotyczące dnia badawczego LEAP.' : 'Zaplanowaliśmy nowy dzień badawczy LEAP.',
+      '',
+      `Data: ${formatDate(block.date)}`,
+      `Godzina: ${block.startTime}–${block.endTime}`,
+      `Rodzaj dnia: ${typeLabel(block.type)}`,
+      `Miejsce: ${block.location}`,
+      `Osoba prowadząca część kliniczną: ${personName(block.clinicalLeadId)}`,
+      `Aktualnie zaproszone osoby: ${currentNames || 'brak'}`,
+      block.notes ? `Ważna informacja: ${block.notes}` : '',
+      '',
+      isUpdate ? 'Sprawdź aktualną listę powyżej. Jeżeli nie ma na niej Twojego nazwiska, nie jesteś już przypisany/a do tego dnia.' : 'Prosimy o zapisanie terminu i potwierdzenie, że wiadomość dotarła.',
+      '',
+      'Pozdrawiamy,',
+      'Zespół LEAP'
+    ].filter((line, index, all) => line || (index > 0 && all[index - 1])).join('\n');
     return {
-      blockId: block.id,
-      date: block.date,
-      startTime: block.startTime,
-      endTime: block.endTime,
-      type: block.type,
-      location: block.location,
-      clinicalLeadId: block.clinicalLeadId,
-      notes: block.notes || ''
+      id: newMailId('day-mail'),
+      category: isUpdate ? 'research-day-updated' : 'research-day-created',
+      recipientIds,
+      subject: `LEAP — ${title}: ${formatDate(block.date)} (${typeLabel(block.type)})`,
+      body
     };
   }
 
-  function queueDayNotifications(previousBlock, block) {
-    const currentIds = block.invitedMemberIds || [];
-    if (!previousBlock) {
-      queueNotification('research-day-created', currentIds, dayNotificationPayload(block));
+  function messageMailDraft(message, recipientIds) {
+    return {
+      id: newMailId('message-mail'),
+      category: 'general-message',
+      recipientIds,
+      subject: `LEAP — ${message.title}`,
+      body: `Dzień dobry,\n\n${message.text}\n\nPozdrawiamy,\nZespół LEAP`
+    };
+  }
+
+  async function sendCurrentMail(isTest) {
+    if (!currentMailDraft) return;
+    if (!document.getElementById('mailComposerForm').reportValidity()) return;
+    const recipientIds = isTest ? ['pi'] : selectedMailRecipientIds();
+    if (!recipientIds.length) {
+      mailSendStatus.textContent = 'Wybierz co najmniej jednego odbiorcę.';
       return;
     }
-
-    const previousIds = previousBlock.invitedMemberIds || [];
-    const previousSet = new Set(previousIds);
-    const currentSet = new Set(currentIds);
-    const addedIds = currentIds.filter(id => !previousSet.has(id));
-    const removedIds = previousIds.filter(id => !currentSet.has(id));
-    const scheduleChanged = ['date', 'startTime', 'endTime', 'type', 'location', 'clinicalLeadId', 'notes']
-      .some(field => previousBlock[field] !== block[field]);
-
-    if (scheduleChanged) {
-      queueNotification('research-day-updated', currentIds, { ...dayNotificationPayload(block), addedRecipientIds: addedIds });
-    } else if (addedIds.length) {
-      queueNotification('research-day-invitation-added', addedIds, dayNotificationPayload(block));
-    }
-    if (removedIds.length) {
-      queueNotification('research-day-invitation-removed', removedIds, dayNotificationPayload(block));
+    mailSendStatus.textContent = isTest ? 'Wysyłanie testu…' : 'Wysyłanie wiadomości…';
+    mailSend.disabled = true;
+    mailTest.disabled = true;
+    try {
+      const result = await window.LEAP_PORTAL_STORE.sendEmail({
+        clientMessageId: isTest ? newMailId('test-mail') : currentMailDraft.id,
+        recipientIds,
+        subject: `${isTest ? '[TEST] ' : ''}${mailSubject.value.trim()}`,
+        body: mailBody.value.trim(),
+        category: currentMailDraft.category,
+        isTest
+      });
+      mailSendStatus.textContent = isTest
+        ? `Test wysłany do konta projektu. Nadawca techniczny: ${result.sender}. Sprawdź skrzynkę przed właściwą wysyłką.${result.logSaved === false ? ' Uwaga: nie udało się zapisać rejestru wysyłki.' : ''}`
+        : `Wysłano do ${result.sentCount} ${result.sentCount === 1 ? 'osoby' : 'osób'}. Nadawca techniczny: ${result.sender}.${result.logSaved === false ? ' Uwaga: nie udało się zapisać rejestru wysyłki.' : ''}`;
+      if (!isTest) {
+        currentMailDraft.sent = true;
+        mailSend.disabled = true;
+      }
+    } catch (error) {
+      const missingNames = (error.missingRecipientIds || []).map(personName);
+      mailSendStatus.textContent = missingNames.length
+        ? `Brak adresów e-mail dla: ${missingNames.join(', ')}. Wiadomość nie została wysłana.`
+        : (error.message || 'Nie udało się wysłać wiadomości.');
+      if (error.code === 'unauthorized') {
+        sessionStorage.removeItem(COORDINATOR_SESSION_KEY);
+        setTimeout(() => location.replace(`portal-coordinator-login.html?v=${VERSION}`), 1800);
+      }
+    } finally {
+      if (!currentMailDraft?.sent) mailSend.disabled = false;
+      mailTest.disabled = false;
     }
   }
 
@@ -156,6 +225,7 @@
   document.getElementById('taskOwner').innerHTML = personOptions();
   document.getElementById('dutiesPerson').innerHTML = personOptions();
   document.getElementById('messageTarget').innerHTML = personOptions(true);
+  document.getElementById('motivatorTarget').innerHTML = personOptions(true);
   dayLead.innerHTML = `<option value="">— wybierz osobę —</option>${personOptions()}`;
 
   function fillDay() {
@@ -234,6 +304,15 @@
     updateInviteSummary();
   });
   document.getElementById('dutiesPerson').addEventListener('change', fillDuties);
+  mailRecipients.addEventListener('change', updateMailRecipientSummary);
+  document.getElementById('mailClose').addEventListener('click', closeMailComposer);
+  document.getElementById('mailCancel').addEventListener('click', closeMailComposer);
+  mailComposer.addEventListener('close', () => { currentMailDraft = null; });
+  document.getElementById('mailTest').addEventListener('click', () => sendCurrentMail(true));
+  document.getElementById('mailComposerForm').addEventListener('submit', event => {
+    event.preventDefault();
+    sendCurrentMail(false);
+  });
 
   document.getElementById('dayForm').addEventListener('submit', async event => {
     event.preventDefault();
@@ -261,11 +340,13 @@
     block.clinicalLeadId = dayLead.value;
     block.invitedMemberIds = selectedInviteIds();
     block.notes = document.getElementById('dayNote').value.trim();
-    queueDayNotifications(previousBlock, block);
+    const prepareEmail = document.getElementById('dayPrepareEmail').checked;
     if (!await save(editing ? 'Zapisano zmiany dnia badawczego.' : 'Dodano nowy dzień badawczy.')) return;
     refreshDayOptions(block.id);
     dayAction.value = 'edit';
     updateDayMode();
+    document.getElementById('dayPrepareEmail').checked = false;
+    if (prepareEmail) openMailComposer(dayMailDraft(previousBlock, block));
   });
 
   dayDelete.addEventListener('click', async () => {
@@ -322,15 +403,26 @@
     };
     data.coordinatorMessages.unshift(message);
     const messageRecipients = message.targetId === 'all' ? activeTeam.map(person => person.id) : [message.targetId];
-    queueNotification('general-message', messageRecipients, {
-      messageId: message.id,
-      title: message.title,
-      text: message.text,
-      expiresDate: message.expiresDate
-    });
-    if (!await save('Opublikowano komunikat. Powiadomienie e-mail dodano do kolejki.')) return;
+    const prepareEmail = document.getElementById('messagePrepareEmail').checked;
+    if (!await save('Opublikowano komunikat.')) return;
     event.target.reset();
     renderMessages();
+    if (prepareEmail) openMailComposer(messageMailDraft(message, messageRecipients));
+  });
+
+  document.getElementById('motivatorForm').addEventListener('submit', event => {
+    event.preventDefault();
+    const targetId = document.getElementById('motivatorTarget').value;
+    const recipientIds = targetId === 'all' ? activeTeam.map(person => person.id) : [targetId];
+    const link = document.getElementById('motivatorLink').value.trim();
+    const text = document.getElementById('motivatorText').value.trim();
+    openMailComposer({
+      id: newMailId('motivator-mail'),
+      category: 'project-motivator',
+      recipientIds,
+      subject: document.getElementById('motivatorSubject').value.trim(),
+      body: `Dzień dobry,\n\n${text}${link ? `\n\nMateriał: ${link}` : ''}\n\nPozdrawiamy,\nZespół LEAP`
+    });
   });
 
   document.addEventListener('click', async event => {
@@ -354,6 +446,5 @@
   fillDuties();
   renderTasks();
   renderMessages();
-  renderNotificationQueue();
   document.documentElement.classList.remove('auth-pending');
 })();

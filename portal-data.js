@@ -206,8 +206,8 @@
     ...[
       [1, 'Zuza Sroka', 'zuza-sroka'],
       [2, 'Zuzia Trzonkowska', 'zuzia-trzonkowska'],
-      [3, 'Student 3', 'student-3'],
-      [4, 'Student 4', 'student-4']
+      [3, 'Jakub Majzon-Wójtowicz', 'jakub-majzon-wojtowicz'],
+      [4, 'Kacper Podsiadły', 'kacper-podsiadly']
     ].map(([number, name, slug]) => ({
       id: `student-${number}`, name, slug,
       primaryRole: 'Certified T0/W12 Research Assessor', secondaryRoles: ['Flexible Assessor'],

@@ -9,14 +9,14 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Manrope:wght@500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="portal-simple.css?v=20260805-2" />
+  <link rel="stylesheet" href="portal-simple.css?v=20260805-3" />
 </head>
 <body>
   <header class="simple-header">
-    <a class="simple-brand" href="portal-coordinator.html?v=20260805-2"><span aria-hidden="true">L</span>LEAP</a>
+    <a class="simple-brand" href="portal-coordinator.html?v=20260805-3"><span aria-hidden="true">L</span>LEAP</a>
     <div class="header-actions">
-      <a class="quiet-link" href="portal-glossary.html?v=20260805-2">Słowniczek</a>
-      <a class="quiet-link" href="portal-coordinator.html?v=20260805-2">← Panel koordynatorów</a>
+      <a class="quiet-link" href="portal-glossary.html?v=20260805-3">Słowniczek</a>
+      <a class="quiet-link" href="portal-coordinator.html?v=20260805-3">← Panel koordynatorów</a>
     </div>
   </header>
 
@@ -34,6 +34,7 @@
       <button type="button" data-edit-view="tasks">Zadania</button>
       <button type="button" data-edit-view="duties">Obowiązki</button>
       <button type="button" data-edit-view="messages">Komunikaty</button>
+      <button type="button" data-edit-view="motivator">Motywator</button>
     </nav>
 
     <p class="save-status" id="editStatus" role="status" aria-live="polite"></p>
@@ -74,6 +75,7 @@
           <p class="invite-summary" id="dayInviteSummary" aria-live="polite"></p>
         </fieldset>
         <label class="field-wide">Ważna informacja<textarea id="dayNote" rows="3"></textarea></label>
+        <label class="field-wide mail-request-option"><input id="dayPrepareEmail" type="checkbox" /><span><strong>Po zapisaniu przygotuj e-mail</strong><small>Najpierw zobaczysz odbiorców, temat i treść. Nic nie zostanie wysłane bez Twojego zatwierdzenia.</small></span></label>
         <div class="form-actions">
           <button class="form-submit" id="daySubmit" type="submit">Dodaj dzień badawczy</button>
           <button class="form-delete" id="dayDelete" type="button" hidden>Usuń dzień</button>
@@ -104,24 +106,59 @@
     </section>
 
     <section class="edit-panel" data-edit-panel="messages" hidden>
-      <div class="edit-heading"><h2>Dodaj komunikat</h2><p>Komunikat może zobaczyć jedna osoba albo cały zespół. Po podłączeniu poczty ten sam komunikat będzie mógł zostać wysłany e-mailem.</p></div>
+      <div class="edit-heading"><h2>Dodaj komunikat</h2><p>Komunikat może zobaczyć jedna osoba albo cały zespół. Możesz też przygotować jego edytowalną wersję e-mail.</p></div>
       <form class="edit-form" id="messageForm">
         <label>Odbiorca<select id="messageTarget" required><option value="all">Cały zespół</option></select></label>
         <label>Ważny do<input id="messageExpiry" type="date" /></label>
         <label class="field-wide">Tytuł<input id="messageTitle" type="text" required maxlength="80" /></label>
         <label class="field-wide">Treść<textarea id="messageText" rows="4" required maxlength="400"></textarea></label>
+        <label class="field-wide mail-request-option"><input id="messagePrepareEmail" type="checkbox" /><span><strong>Po opublikowaniu przygotuj e-mail</strong><small>Przed wysłaniem będzie można zmienić odbiorców, temat i treść.</small></span></label>
         <button class="form-submit" type="submit">Opublikuj komunikat</button>
       </form>
       <div class="edit-current"><h3>Aktualne komunikaty</h3><ul class="plain-list" id="editableMessages"></ul></div>
     </section>
 
+    <section class="edit-panel" data-edit-panel="motivator" hidden>
+      <div class="edit-heading"><h2>Motywator projektu</h2><p>Wyślij od czasu do czasu krótką inspirację, materiał szkoleniowy, publikację albo wiadomość wzmacniającą zespół. To wysyłka ręczna — bez automatycznego harmonogramu.</p></div>
+      <form class="edit-form" id="motivatorForm">
+        <label>Odbiorca<select id="motivatorTarget" required><option value="all">Cały zespół</option></select></label>
+        <label>Link — opcjonalnie<input id="motivatorLink" type="url" placeholder="https://…" /></label>
+        <label class="field-wide">Temat<input id="motivatorSubject" type="text" required maxlength="120" value="LEAP — inspiracja dla zespołu" /></label>
+        <label class="field-wide">Wiadomość<textarea id="motivatorText" rows="7" required maxlength="3000" placeholder="Krótka wiadomość, dlaczego ten materiał jest ważny dla naszego projektu…"></textarea></label>
+        <button class="form-submit" type="submit">Przygotuj e-mail</button>
+      </form>
+    </section>
+
     <p class="local-sync-note">Zmiany zapisują się we wspólnym arkuszu Google i są automatycznie pobierane przez panele badaczy na pozostałych urządzeniach.</p>
-    <p class="local-sync-note notification-queue-note" id="notificationQueueStatus" role="status" aria-live="polite"></p>
+    <p class="local-sync-note notification-queue-note">E-maile są wysyłane dopiero po sprawdzeniu podglądu i użyciu przycisku „Wyślij”.</p>
   </main>
 
-  <script src="portal-data.js?v=20260805-2"></script>
-  <script src="portal-sync-config.js?v=20260805-2"></script>
-  <script src="portal-store.js?v=20260805-2"></script>
-  <script src="portal-coordinator-edit.js?v=20260805-2"></script>
+  <dialog class="mail-dialog" id="mailComposer" aria-labelledby="mailComposerTitle">
+    <div class="mail-dialog-heading">
+      <div><p class="eyebrow">Ostatnia kontrola</p><h2 id="mailComposerTitle">Sprawdź e-mail przed wysłaniem</h2></div>
+      <button class="mail-dialog-close" id="mailClose" type="button" aria-label="Zamknij podgląd">×</button>
+    </div>
+    <p class="mail-dialog-help">Możesz zmienić odbiorców, temat i treść. Najpierw warto wysłać test wyłącznie do konta projektu.</p>
+    <form class="mail-compose-form" id="mailComposerForm">
+      <fieldset>
+        <legend>Odbiorcy</legend>
+        <div class="mail-recipient-list" id="mailRecipients"></div>
+        <p class="invite-summary" id="mailRecipientSummary" aria-live="polite"></p>
+      </fieldset>
+      <label>Temat<input id="mailSubject" type="text" required maxlength="140" /></label>
+      <label>Treść<textarea id="mailBody" rows="13" required maxlength="6000"></textarea></label>
+      <p class="save-status mail-send-status" id="mailSendStatus" role="status" aria-live="polite"></p>
+      <div class="mail-dialog-actions">
+        <button class="quiet-button" id="mailTest" type="button">Wyślij test do konta projektu</button>
+        <button class="form-submit" id="mailSend" type="submit">Wyślij e-mail</button>
+        <button class="form-delete" id="mailCancel" type="button">Anuluj</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="portal-data.js?v=20260805-3"></script>
+  <script src="portal-sync-config.js?v=20260805-3"></script>
+  <script src="portal-store.js?v=20260805-3"></script>
+  <script src="portal-coordinator-edit.js?v=20260805-3"></script>
 </body>
 </html>
