@@ -407,6 +407,27 @@ button, a { -webkit-tap-highlight-color: transparent; }
 }
 .edit-current { margin-top: 42px; padding-top: 27px; border-top: 1px solid var(--line); }
 .edit-current h3 { margin: 0 0 20px; font: 600 20px var(--display); }
+.attendance-card { margin-top: 34px; padding: 24px; border: 1px solid var(--line); background: var(--white); }
+.attendance-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; }
+.attendance-heading h3 { margin: 2px 0 0; font: 600 23px var(--display); letter-spacing: -.025em; }
+.attendance-heading .eyebrow { margin: 0; }
+.attendance-counts { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0 16px; }
+.attendance-count { display: inline-flex; align-items: baseline; gap: 6px; padding: 8px 11px; border: 1px solid currentColor; font-size: 12px; font-weight: 700; }
+.attendance-count b { font-size: 17px; }
+.attendance-yes { color: #176b4d; background: #edf8f3; }
+.attendance-no { color: #8b3028; background: #fff0ee; }
+.attendance-pending { color: #80601d; background: #fff8e8; }
+.attendance-loading { color: var(--muted); font-size: 13px; }
+.attendance-list { margin: 0; padding: 0; border-top: 1px solid var(--line); list-style: none; }
+.attendance-list li { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.attendance-list li > span:first-child { display: grid; gap: 3px; }
+.attendance-list small { color: var(--muted); font-size: 11px; }
+.attendance-status { flex: 0 0 auto; padding: 6px 9px; font-size: 11px; font-weight: 700; }
+.attendance-status.is-yes { color: #176b4d; background: #edf8f3; }
+.attendance-status.is-no { color: #8b3028; background: #fff0ee; }
+.attendance-status.is-pending { color: #80601d; background: #fff8e8; }
+.attendance-actions { margin-top: 18px; }
+.attendance-help { margin: 10px 0 0; color: var(--muted); font-size: 12px; line-height: 1.5; }
 .row-action {
   padding: 7px 9px;
   border: 1px solid var(--ink);
@@ -437,6 +458,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .mail-dialog-heading h2 { margin: 0; font: 600 clamp(25px, 4vw, 34px)/1.15 var(--display); letter-spacing: -.04em; }
 .mail-dialog-close { width: 38px; height: 38px; border: 1px solid var(--ink); background: transparent; color: var(--ink); cursor: pointer; font-size: 25px; line-height: 1; }
 .mail-dialog-help { margin: 13px 0 24px; color: var(--muted); line-height: 1.55; }
+.mail-rsvp-note { margin: -10px 0 22px; padding: 12px 14px; border-left: 4px solid #176b4d; background: #edf8f3; color: #245443; font-size: 13px; line-height: 1.55; }
 .mail-compose-form { display: grid; gap: 18px; }
 .mail-compose-form > label { display: grid; gap: 7px; font-size: 12px; font-weight: 700; }
 .mail-compose-form input,
@@ -468,6 +490,8 @@ button, a { -webkit-tap-highlight-color: transparent; }
   .edit-form .field-wide { grid-column: auto; }
   .invite-list { grid-template-columns: 1fr; }
   .mail-recipient-list { grid-template-columns: 1fr; }
+  .attendance-card { padding: 18px; }
+  .attendance-heading, .attendance-list li { align-items: flex-start; }
   .glossary-item { grid-template-columns: 1fr; gap: 9px; }
 }
 

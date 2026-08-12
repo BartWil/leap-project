@@ -9,14 +9,14 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Manrope:wght@500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="portal-simple.css?v=20260805-4" />
+  <link rel="stylesheet" href="portal-simple.css?v=20260812-1" />
 </head>
 <body>
   <header class="simple-header">
-    <a class="simple-brand" href="portal-coordinator.html?v=20260805-4"><span aria-hidden="true">L</span>LEAP</a>
+    <a class="simple-brand" href="portal-coordinator.html?v=20260812-1"><span aria-hidden="true">L</span>LEAP</a>
     <div class="header-actions">
-      <a class="quiet-link" href="portal-glossary.html?v=20260805-4">Słowniczek</a>
-      <a class="quiet-link" href="portal-coordinator.html?v=20260805-4">← Panel koordynatorów</a>
+      <a class="quiet-link" href="portal-glossary.html?v=20260812-1">Słowniczek</a>
+      <a class="quiet-link" href="portal-coordinator.html?v=20260812-1">← Panel koordynatorów</a>
     </div>
   </header>
 
@@ -81,6 +81,18 @@
           <button class="form-delete" id="dayDelete" type="button" hidden>Usuń dzień</button>
         </div>
       </form>
+      <section class="attendance-card" id="attendanceCard" hidden aria-labelledby="attendanceTitle">
+        <div class="attendance-heading">
+          <div><p class="eyebrow">Potwierdzenia obecności</p><h3 id="attendanceTitle">Kto będzie?</h3></div>
+          <button class="quiet-button" id="attendanceRefresh" type="button">Odśwież</button>
+        </div>
+        <div class="attendance-counts" id="attendanceCounts" aria-live="polite"></div>
+        <ul class="attendance-list" id="attendanceList"></ul>
+        <div class="attendance-actions">
+          <button class="quiet-button" id="attendanceReminder" type="button">Przygotuj przypomnienie dla osób bez odpowiedzi</button>
+        </div>
+        <p class="attendance-help" id="attendanceHelp">Odpowiedzi zapisują się po kliknięciu „TAK” lub „NIE” w indywidualnej wiadomości e-mail.</p>
+      </section>
     </section>
 
     <section class="edit-panel" data-edit-panel="tasks" hidden>
@@ -139,6 +151,7 @@
       <button class="mail-dialog-close" id="mailClose" type="button" aria-label="Zamknij podgląd">×</button>
     </div>
     <p class="mail-dialog-help">Możesz zmienić odbiorców, temat i treść. Najpierw warto wysłać test wyłącznie do konta projektu.</p>
+    <p class="mail-rsvp-note" id="mailRsvpNote" hidden>Każdy odbiorca otrzyma własne przyciski „TAK — będę” i „NIE — nie mogę”. Linki zostaną dodane automatycznie podczas wysyłki.</p>
     <form class="mail-compose-form" id="mailComposerForm">
       <fieldset>
         <legend>Odbiorcy</legend>
@@ -156,9 +169,9 @@
     </form>
   </dialog>
 
-  <script src="portal-data.js?v=20260805-4"></script>
-  <script src="portal-sync-config.js?v=20260805-4"></script>
-  <script src="portal-store.js?v=20260805-4"></script>
-  <script src="portal-coordinator-edit.js?v=20260805-4"></script>
+  <script src="portal-data.js?v=20260812-1"></script>
+  <script src="portal-sync-config.js?v=20260812-1"></script>
+  <script src="portal-store.js?v=20260812-1"></script>
+  <script src="portal-coordinator-edit.js?v=20260812-1"></script>
 </body>
 </html>

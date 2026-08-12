@@ -3,7 +3,7 @@
 
   const SESSION_KEY = 'leap-portal-authenticated';
   const COORDINATOR_SESSION_KEY = 'leap-coordinator-authenticated';
-  const VERSION = '20260805-4';
+  const VERSION = '20260812-1';
 
   if (sessionStorage.getItem(SESSION_KEY) !== 'true') {
     location.replace(`portal.html?v=${VERSION}`);
@@ -54,6 +54,7 @@
   const mailSendStatus = document.getElementById('mailSendStatus');
   const mailSend = document.getElementById('mailSend');
   const mailTest = document.getElementById('mailTest');
+  const mailRsvpNote = document.getElementById('mailRsvpNote');
   let currentMailDraft = null;
 
   function newMailId(prefix) {
@@ -81,6 +82,7 @@
     mailSendStatus.textContent = '';
     mailSend.disabled = false;
     mailTest.disabled = false;
+    mailRsvpNote.hidden = !draft.rsvpBlockId;
     updateMailRecipientSummary();
     mailComposer.showModal();
   }
@@ -110,7 +112,8 @@
       `Aktualnie zaproszone osoby: ${currentNames || 'brak'}`,
       block.notes ? `Ważna informacja: ${block.notes}` : '',
       '',
-      isUpdate ? 'Sprawdź aktualną listę powyżej. Jeżeli nie ma na niej Twojego nazwiska, nie jesteś już przypisany/a do tego dnia.' : 'Prosimy o zapisanie terminu i potwierdzenie, że wiadomość dotarła.',
+      isUpdate ? 'Sprawdź aktualną listę powyżej. Jeżeli nie ma na niej Twojego nazwiska, nie jesteś już przypisany/a do tego dnia.' : 'Prosimy o zapisanie terminu.',
+      currentIds.length ? 'Na końcu wiadomości znajdziesz przyciski „TAK — będę” i „NIE — nie mogę”. Prosimy o wybranie jednej odpowiedzi.' : '',
       '',
       'Pozdrawiamy,',
       'Zespół LEAP'
@@ -118,6 +121,7 @@
     return {
       id: newMailId('day-mail'),
       category: isUpdate ? 'research-day-updated' : 'research-day-created',
+      rsvpBlockId: block.id,
       recipientIds,
       subject: `LEAP — ${title}: ${formatDate(block.date)} (${typeLabel(block.type)})`,
       body
@@ -131,6 +135,32 @@
       recipientIds,
       subject: `LEAP — ${message.title}`,
       body: `Dzień dobry,\n\n${message.text}\n\nPozdrawiamy,\nZespół LEAP`
+    };
+  }
+
+  function attendanceReminderDraft(block, recipientIds) {
+    return {
+      id: newMailId('rsvp-reminder'),
+      category: 'research-day-reminder',
+      rsvpBlockId: block.id,
+      recipientIds,
+      subject: `LEAP — prosimy o potwierdzenie obecności: ${formatDate(block.date)} (${typeLabel(block.type)})`,
+      body: [
+        'Dzień dobry,',
+        '',
+        'Nie mamy jeszcze Twojej odpowiedzi dotyczącej najbliższego dnia badawczego LEAP.',
+        '',
+        `Data: ${formatDate(block.date)}`,
+        `Godzina: ${block.startTime}–${block.endTime}`,
+        `Rodzaj dnia: ${typeLabel(block.type)}`,
+        `Miejsce: ${block.location}`,
+        `Osoba prowadząca część kliniczną: ${personName(block.clinicalLeadId)}`,
+        '',
+        'Na końcu wiadomości wybierz „TAK — będę” albo „NIE — nie mogę”.',
+        '',
+        'Pozdrawiamy,',
+        'Zespół LEAP'
+      ].join('\n')
     };
   }
 
@@ -152,6 +182,7 @@
         subject: `${isTest ? '[TEST] ' : ''}${mailSubject.value.trim()}`,
         body: mailBody.value.trim(),
         category: currentMailDraft.category,
+        rsvpBlockId: currentMailDraft.rsvpBlockId || '',
         isTest
       });
       mailSendStatus.textContent = isTest
@@ -189,6 +220,64 @@
   const dayLead = document.getElementById('dayLead');
   const dayInvitees = document.getElementById('dayInvitees');
   const dayInviteSummary = document.getElementById('dayInviteSummary');
+  const attendanceCard = document.getElementById('attendanceCard');
+  const attendanceCounts = document.getElementById('attendanceCounts');
+  const attendanceList = document.getElementById('attendanceList');
+  const attendanceHelp = document.getElementById('attendanceHelp');
+  const attendanceReminder = document.getElementById('attendanceReminder');
+  let currentAttendance = null;
+
+  const attendanceLabels = {
+    yes: 'Będzie',
+    no: 'Nie może',
+    pending: 'Brak odpowiedzi'
+  };
+
+  function formatResponseTime(value) {
+    if (!value) return '';
+    return new Intl.DateTimeFormat('pl-PL', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(value));
+  }
+
+  function renderAttendance(result) {
+    currentAttendance = result;
+    const counts = result.counts || { yes: 0, no: 0, pending: 0 };
+    attendanceCounts.innerHTML = [
+      `<span class="attendance-count attendance-yes"><b>${counts.yes}</b> będzie</span>`,
+      `<span class="attendance-count attendance-no"><b>${counts.no}</b> nie może</span>`,
+      `<span class="attendance-count attendance-pending"><b>${counts.pending}</b> bez odpowiedzi</span>`
+    ].join('');
+    attendanceList.innerHTML = result.items.length
+      ? result.items.map(item => `<li><span><strong>${esc(personName(item.memberId))}</strong>${item.respondedAt ? `<small>odpowiedź ${esc(formatResponseTime(item.respondedAt))}</small>` : ''}</span><span class="attendance-status is-${esc(item.status)}">${esc(attendanceLabels[item.status] || attendanceLabels.pending)}</span></li>`).join('')
+      : '<li><span>Nie zaproszono jeszcze żadnej osoby.</span></li>';
+    attendanceReminder.disabled = counts.pending === 0;
+    attendanceHelp.textContent = counts.pending
+      ? 'Przypomnienie zostanie przygotowane wyłącznie dla osób bez odpowiedzi.'
+      : 'Wszystkie zaproszone osoby już odpowiedziały.';
+  }
+
+  async function refreshAttendance() {
+    const block = data.blocks.find(item => item.id === dayBlock.value);
+    if (dayAction.value !== 'edit' || !block) {
+      attendanceCard.hidden = true;
+      currentAttendance = null;
+      return;
+    }
+    attendanceCard.hidden = false;
+    attendanceCounts.innerHTML = '<span class="attendance-loading">Pobieranie odpowiedzi…</span>';
+    attendanceList.innerHTML = '';
+    attendanceReminder.disabled = true;
+    try {
+      renderAttendance(await window.LEAP_PORTAL_STORE.getAttendanceStatus(block.id));
+    } catch (error) {
+      currentAttendance = null;
+      attendanceCounts.innerHTML = '<span class="attendance-loading">Nie udało się pobrać odpowiedzi.</span>';
+      attendanceHelp.textContent = error?.message || 'Odśwież panel i spróbuj ponownie.';
+      if (error?.code === 'unauthorized') {
+        sessionStorage.removeItem(COORDINATOR_SESSION_KEY);
+        setTimeout(() => location.replace(`portal-coordinator-login.html?v=${VERSION}`), 1800);
+      }
+    }
+  }
 
   function selectedInviteIds() {
     const checkedIds = [...dayInvitees.querySelectorAll('input[type="checkbox"]:checked:not(:disabled)')]
@@ -239,6 +328,7 @@
     dayLead.value = block.clinicalLeadId || '';
     renderInvitees(block.invitedMemberIds || [block.clinicalLeadId]);
     document.getElementById('dayNote').value = block.notes || '';
+    refreshAttendance();
   }
 
   function prepareNewDay() {
@@ -259,7 +349,11 @@
     daySubmit.textContent = editing ? 'Zapisz zmiany dnia' : 'Dodaj dzień badawczy';
     dayDelete.hidden = !editing;
     if (editing) fillDay();
-    else prepareNewDay();
+    else {
+      prepareNewDay();
+      attendanceCard.hidden = true;
+      currentAttendance = null;
+    }
   }
 
   function fillDuties() {
@@ -293,6 +387,12 @@
 
   dayAction.addEventListener('change', updateDayMode);
   dayBlock.addEventListener('change', fillDay);
+  document.getElementById('attendanceRefresh').addEventListener('click', refreshAttendance);
+  attendanceReminder.addEventListener('click', () => {
+    const block = data.blocks.find(item => item.id === dayBlock.value);
+    const pendingIds = (currentAttendance?.items || []).filter(item => item.status === 'pending').map(item => item.memberId);
+    if (block && pendingIds.length) openMailComposer(attendanceReminderDraft(block, pendingIds));
+  });
   dayLead.addEventListener('change', () => renderInvitees(selectedInviteIds()));
   dayInvitees.addEventListener('change', updateInviteSummary);
   document.getElementById('dayInviteAll').addEventListener('click', () => {
@@ -346,6 +446,7 @@
     dayAction.value = 'edit';
     updateDayMode();
     document.getElementById('dayPrepareEmail').checked = false;
+    refreshAttendance();
     if (prepareEmail) openMailComposer(dayMailDraft(previousBlock, block));
   });
 
@@ -446,5 +547,9 @@
   fillDuties();
   renderTasks();
   renderMessages();
+  setInterval(() => {
+    const daysPanelVisible = !document.querySelector('[data-edit-panel="days"]').hidden;
+    if (daysPanelVisible && dayAction.value === 'edit' && !mailComposer.open) refreshAttendance();
+  }, 30000);
   document.documentElement.classList.remove('auth-pending');
 })();

@@ -305,6 +305,7 @@
       subject: String(draft.subject || ''),
       body: String(draft.body || ''),
       category: String(draft.category || 'general'),
+      rsvpBlockId: String(draft.rsvpBlockId || ''),
       isTest: draft.isTest === true
     });
     const result = await waitForStatus('operation-status', id);
@@ -315,11 +316,32 @@
         invalid_email_draft: 'Uzupełnij odbiorców, temat i treść wiadomości.',
         missing_contacts: 'Nie wszystkie wybrane osoby mają zapisany adres e-mail.',
         mail_quota_exceeded: 'Dzisiejszy limit wysyłki Google został wyczerpany.',
+        invalid_rsvp_request: 'Nie udało się utworzyć bezpiecznych linków potwierdzenia.',
+        rsvp_block_not_found: 'Nie znaleziono aktualnego dnia badawczego dla tej wiadomości.',
         mail_send_failed: 'Google nie potwierdził wysyłki. Najpierw sprawdź skrzynkę projektu i nie klikaj ponownie, aby uniknąć duplikatu.'
       };
       const error = new Error(messages[result?.error] || 'Nie udało się wysłać wiadomości.');
       error.code = result?.error || 'mail_send_failed';
       error.missingRecipientIds = Array.isArray(result?.missingRecipientIds) ? result.missingRecipientIds : [];
+      throw error;
+    }
+    return result;
+  }
+
+  async function getAttendanceStatus(blockId) {
+    const token = coordinatorToken();
+    if (!token) {
+      const error = new Error('Sesja koordynatora wygasła. Zaloguj się ponownie.');
+      error.code = 'unauthorized';
+      throw error;
+    }
+    const result = await jsonp('attendance-status', { token, blockId: String(blockId || '') });
+    if (!result?.ok) {
+      if (result?.error === 'unauthorized') clearCoordinatorToken();
+      const error = new Error(result?.error === 'rsvp_block_not_found'
+        ? 'Nie znaleziono tego dnia badawczego.'
+        : 'Nie udało się pobrać potwierdzeń obecności.');
+      error.code = result?.error || 'attendance_failed';
       throw error;
     }
     return result;
@@ -371,6 +393,7 @@
     load,
     save,
     sendEmail,
+    getAttendanceStatus,
     watch,
     getStatus,
     isConfigured,
