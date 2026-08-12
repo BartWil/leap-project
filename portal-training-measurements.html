@@ -9,21 +9,21 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Manrope:wght@500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="portal-simple.css?v=20260812-1" />
-  <link rel="stylesheet" href="portal-training.css?v=20260812-1" />
+  <link rel="stylesheet" href="portal-simple.css?v=20260812-2" />
+  <link rel="stylesheet" href="portal-training.css?v=20260812-2" />
 </head>
 <body>
   <header class="simple-header">
-    <a class="simple-brand" href="portal-training.html?v=20260812-1"><span aria-hidden="true">L</span>LEAP</a>
+    <a class="simple-brand" href="portal-training.html?v=20260812-2"><span aria-hidden="true">L</span>LEAP</a>
     <div class="header-actions">
-      <a class="quiet-link" href="portal-glossary.html?v=20260812-1">Słowniczek</a>
-      <a class="quiet-link" href="portal-training.html?v=20260812-1">Panel treningowy</a>
+      <a class="quiet-link" href="portal-glossary.html?v=20260812-2">Słowniczek</a>
+      <a class="quiet-link" href="portal-training.html?v=20260812-2">Panel treningowy</a>
       <button class="quiet-button" type="button" data-training-logout>Wyloguj</button>
     </div>
   </header>
 
   <main class="simple-main training-main protocol-main">
-    <a class="protocol-back" href="portal-training.html?v=20260812-1">← Wszystkie materiały</a>
+    <a class="protocol-back" href="portal-training.html?v=20260812-2">← Wszystkie materiały</a>
 
     <header class="simple-intro training-intro protocol-intro">
       <div>
@@ -81,6 +81,26 @@
       </div>
     </section>
 
+    <section class="training-video-card tanita-video-card" aria-labelledby="tanitaVideoTitle">
+      <div class="training-video-copy">
+        <p class="eyebrow">Tutorial stanowiskowy · 1 min 7 s</p>
+        <h2 id="tanitaVideoTitle">Tanita BC-418 — co kliknąć?</h2>
+        <p>Film pokazuje kolejność obsługi panelu urządzenia: uruchomienie pomiaru, wprowadzanie wymaganych wartości i zatwierdzanie kolejnych ekranów. Obejrzyj go przed pierwszą samodzielną obsługą Tanity.</p>
+        <ul class="check-list">
+          <li>zatrzymuj nagranie, jeśli potrzebujesz sprawdzić konkretny przycisk,</li>
+          <li>przed rozpoczęciem miej przygotowane dane wymagane przez urządzenie,</li>
+          <li>po pomiarze odbierz wydruk i natychmiast opisz go kodem uczestnika.</li>
+        </ul>
+      </div>
+      <figure class="training-video-frame">
+        <video class="training-video" controls preload="metadata" playsinline aria-label="Tutorial obsługi panelu analizatora Tanita BC-418">
+          <source src="assets/training/Tanita_BC418_tutorial.mp4" type="video/mp4" />
+          Twoja przeglądarka nie obsługuje filmu. <a href="assets/training/Tanita_BC418_tutorial.mp4">Pobierz nagranie MP4.</a>
+        </video>
+        <figcaption>Obsługa przycisków Tanity BC-418 · film pionowy.</figcaption>
+      </figure>
+    </section>
+
     <section class="test-section" aria-labelledby="measurementsProcedureTitle">
       <div class="training-section-heading">
         <div>
@@ -115,12 +135,12 @@
           </summary>
           <div class="procedure-body">
             <ol class="procedure-steps">
-              <li><strong>Sprawdź wysokość stołu.</strong><span>Przed badaniami upewnij się, że znasz zmierzoną wysokość stołu używanego na stanowisku.</span></li>
+              <li><strong>Użyj stołu GUMed o wysokości 72,8 cm.</strong><span>Ta wartość została zmierzona dla stanowiska oceny wzrostu siedzącego na GUMed. Jeżeli używasz innego stołu, zmierz jego wysokość przed badaniem i nie stosuj automatycznie wartości 72,8 cm.</span></li>
               <li><strong>Posadź uczestnika.</strong><span>Poproś, aby usiadł wyprostowany na stole. Ustaw stadiometr tak, aby zmierzyć wysokość od podłoża do szczytu głowy.</span></li>
-              <li><strong>Odejmij wysokość stołu.</strong><span>Wysokość siedzeniowa = odczyt ze stadiometru − wysokość stołu. Do CRF wpisz już obliczony wynik w centymetrach.</span></li>
+              <li><strong>Odejmij wysokość stołu.</strong><span>Na stanowisku GUMed: wysokość siedzeniowa = odczyt ze stadiometru − <b>72,8 cm</b>. Do CRF wpisz już obliczony wynik w centymetrach.</span></li>
               <li><strong>Powtórz i porównaj.</strong><span>Wykonaj dwa pomiary. Jeśli różnica przekracza 0,5 cm, wykonaj trzeci i jako wynik wybierz medianę.</span></li>
             </ol>
-            <p class="record-note"><strong>Nie wpisuj do pola Sitting Height surowego odczytu ze stadiometru.</strong> Najpierw odejmij wysokość stołu.</p>
+            <p class="record-note"><strong>Nie wpisuj do pola Sitting Height surowego odczytu ze stadiometru.</strong> Na GUMed najpierw odejmij 72,8 cm — zmierzoną wysokość stołu.</p>
           </div>
         </details>
 
@@ -132,8 +152,8 @@
           </summary>
           <div class="procedure-body">
             <div class="pending-inline">
-              <strong>Pełny tutorial oraz film obsługi Tanity zostaną dodane później.</strong>
-              <p>Planowany materiał pokaże przygotowanie urządzenia, wprowadzenie danych, prawidłową pozycję uczestnika, wykonanie pomiaru, odczyt i opisanie wydruku. Do tego czasu urządzenie obsługuje wyłącznie osoba przeszkolona, zgodnie z bieżącą instrukcją stanowiska.</p>
+              <strong>Film powyżej pokazuje, co klikać na panelu Tanity.</strong>
+              <p>Pełną standaryzację przygotowania i pozycji uczestnika uzupełnimy osobno. Do tego czasu urządzenie obsługuje osoba przeszkolona, zgodnie z bieżącą instrukcją stanowiska.</p>
             </div>
             <ol class="procedure-steps">
               <li><strong>Zweryfikuj kod.</strong><span>Przed pomiarem sprawdź kod uczestnika w CRF. Nie używaj imienia ani nazwiska.</span></li>
@@ -185,9 +205,9 @@
       </ul>
     </section>
 
-    <p class="training-footnote">To skrócona pomoc stanowiskowa. Pełną instrukcję Tanity oraz punkty pomiaru długości kończyn dodamy po zatwierdzeniu metodologii.</p>
+    <p class="training-footnote">To skrócona pomoc stanowiskowa. Film pokazuje obsługę panelu Tanity; pełną standaryzację przygotowania uczestnika oraz punkty pomiaru długości kończyn uzupełnimy po zatwierdzeniu metodologii.</p>
   </main>
 
-  <script src="portal-training.js?v=20260812-1"></script>
+  <script src="portal-training.js?v=20260812-2"></script>
 </body>
 </html>

@@ -371,6 +371,7 @@
 .calibration-video-card figcaption { color: var(--muted); font-size: 11px; }
 .opencap-preflight { margin-top: 18px; }
 .operator-training-card .training-video { width: 100%; max-width: 520px; aspect-ratio: 1638 / 1020; }
+.tanita-video-card .training-video { aspect-ratio: 320 / 568; }
 .operator-training-card figcaption { color: var(--muted); font-size: 11px; line-height: 1.45; }
 
 .warmup-video-link {
