@@ -8,13 +8,30 @@
   const tokenFromUrl = new URL(location.href).searchParams.get('access') || '';
   const previewMemberId = new URL(location.href).searchParams.get('preview') || '';
   const isCoordinatorPreview = /^(alicja|natalia|filip)$/.test(previewMemberId);
+  let accessToken = '';
   if (/^[a-f0-9]{64}$/i.test(tokenFromUrl)) {
-    localStorage.setItem(TOKEN_KEY, tokenFromUrl);
-    const cleanUrl = new URL(location.href);
-    cleanUrl.searchParams.delete('access');
-    history.replaceState(null, '', `${cleanUrl.pathname}${cleanUrl.search}${cleanUrl.hash}`);
+    accessToken = tokenFromUrl;
+    let tokenSaved = false;
+    try {
+      localStorage.setItem(TOKEN_KEY, tokenFromUrl);
+      tokenSaved = true;
+    } catch {
+      try {
+        sessionStorage.setItem(TOKEN_KEY, tokenFromUrl);
+        tokenSaved = true;
+      } catch {}
+    }
+    if (tokenSaved) {
+      const cleanUrl = new URL(location.href);
+      cleanUrl.searchParams.delete('access');
+      history.replaceState(null, '', `${cleanUrl.pathname}${cleanUrl.search}${cleanUrl.hash}`);
+    }
+  } else {
+    try { accessToken = localStorage.getItem(TOKEN_KEY) || ''; } catch {}
+    if (!accessToken) {
+      try { accessToken = sessionStorage.getItem(TOKEN_KEY) || ''; } catch {}
+    }
   }
-  let accessToken = localStorage.getItem(TOKEN_KEY) || '';
   let snapshot = null;
   let currentBlock = null;
   let lastChangeCategory = 'research-day-created';
@@ -32,7 +49,10 @@
   const mailDialog = document.getElementById('leadMailDialog');
 
   function showError(text, revoke = false) {
-    if (revoke) localStorage.removeItem(TOKEN_KEY);
+    if (revoke) {
+      try { localStorage.removeItem(TOKEN_KEY); } catch {}
+      try { sessionStorage.removeItem(TOKEN_KEY); } catch {}
+    }
     loading.hidden = true;
     app.hidden = true;
     errorPanel.hidden = false;
@@ -394,7 +414,8 @@
       location.href = 'portal-coordinator.html?v=20260813-4';
       return;
     }
-    localStorage.removeItem(TOKEN_KEY);
+    try { localStorage.removeItem(TOKEN_KEY); } catch {}
+    try { sessionStorage.removeItem(TOKEN_KEY); } catch {}
     accessToken = '';
     location.reload();
   });
