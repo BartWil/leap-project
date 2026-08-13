@@ -3,7 +3,7 @@
 
   const SESSION_KEY = 'leap-portal-authenticated';
   const COORDINATOR_SESSION_KEY = 'leap-coordinator-authenticated';
-  const VERSION = '20260812-2';
+  const VERSION = '20260813-2';
 
   if (sessionStorage.getItem(SESSION_KEY) !== 'true') {
     location.replace(`portal.html?v=${VERSION}`);
@@ -19,7 +19,7 @@
   const activeTeam = data.team.filter(person => person.status !== 'Vacant');
   const esc = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
   const personName = id => data.team.find(person => person.id === id)?.name || 'Nieprzypisano';
-  const typeLabel = value => value === 'Mixed' ? 'Blok mieszany' : value;
+  const typeLabel = value => value === 'Mixed' ? 'Blok mieszany' : value === 'LASER' ? 'Laser/sham' : value;
   const formatDate = value => value ? new Intl.DateTimeFormat('pl-PL', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date(`${value}T12:00:00`)) : 'bez terminu';
 
   async function save(message) {
@@ -82,7 +82,11 @@
     mailSendStatus.textContent = '';
     mailSend.disabled = false;
     mailTest.disabled = false;
+    mailTest.hidden = draft.leadAccess === true;
     mailRsvpNote.hidden = !draft.rsvpBlockId;
+    mailRsvpNote.textContent = draft.leadAccess
+      ? 'Prowadzący otrzyma indywidualny przycisk „Zarządzaj obecnością”. Link otworzy ograniczony panel tylko dla tego dnia.'
+      : 'Każdy odbiorca otrzyma własne przyciski „TAK — będę” i „NIE — nie mogę”. Linki zostaną dodane automatycznie podczas wysyłki.';
     updateMailRecipientSummary();
     mailComposer.showModal();
   }
@@ -164,6 +168,27 @@
     };
   }
 
+  function leadAccessDraft(block) {
+    return {
+      id: newMailId('lead-access'),
+      category: 'research-day-lead-access',
+      leadAccess: true,
+      rsvpBlockId: block.id,
+      recipientIds: [block.clinicalLeadId],
+      subject: `LEAP — panel prowadzącego dzień: ${formatDate(block.date)} (${typeLabel(block.type)})`,
+      body: [
+        'Dzień dobry,', '',
+        `Prowadzisz część kliniczną dnia badawczego LEAP ${formatDate(block.date)}.`, '',
+        `Godzina: ${block.startTime}–${block.endTime}`,
+        `Rodzaj dnia: ${typeLabel(block.type)}`,
+        `Miejsce: ${block.location}`, '',
+        'Na końcu wiadomości znajdziesz przycisk „Zarządzaj obecnością”. W ograniczonym panelu zobaczysz, kto odpowiedział TAK lub NIE, i wyślesz przypomnienie osobom bez odpowiedzi.',
+        'Panel dotyczy wyłącznie tego dnia i nie pozwala zmieniać terminu ani pozostałych danych projektu.', '',
+        'Pozdrawiamy,', 'Zespół LEAP'
+      ].join('\n')
+    };
+  }
+
   async function sendCurrentMail(isTest) {
     if (!currentMailDraft) return;
     if (!document.getElementById('mailComposerForm').reportValidity()) return;
@@ -225,6 +250,7 @@
   const attendanceList = document.getElementById('attendanceList');
   const attendanceHelp = document.getElementById('attendanceHelp');
   const attendanceReminder = document.getElementById('attendanceReminder');
+  const attendanceLeadAccess = document.getElementById('attendanceLeadAccess');
   let currentAttendance = null;
 
   const attendanceLabels = {
@@ -324,7 +350,7 @@
     document.getElementById('dayStart').value = block.startTime;
     document.getElementById('dayEnd').value = block.endTime;
     document.getElementById('dayLocation').value = block.location;
-    dayType.value = ['T0', 'W12', 'T1', 'Mixed'].includes(block.type) ? block.type : 'Mixed';
+    dayType.value = ['T0', 'W12', 'T1', 'LASER', 'Mixed'].includes(block.type) ? block.type : 'Mixed';
     dayLead.value = block.clinicalLeadId || '';
     renderInvitees(block.invitedMemberIds || [block.clinicalLeadId]);
     document.getElementById('dayNote').value = block.notes || '';
@@ -377,12 +403,48 @@
       : '<li><p class="empty-message">Brak komunikatów koordynatorów.</p></li>';
   }
 
+  let delegateAccessLoaded = false;
+
+  function formatAccessTime(value) {
+    if (!value) return 'jeszcze nie użyto';
+    try {
+      return new Intl.DateTimeFormat('pl-PL', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(value));
+    } catch {
+      return 'brak danych';
+    }
+  }
+
+  function renderDelegateAccess(items) {
+    const list = document.getElementById('delegateAccessList');
+    list.innerHTML = items.map(item => `<article class="delegate-access-card">
+      <div><h3>${esc(item.name)}</h3><p>Zakres: ${esc(item.scopeLabel)} · ostatnie użycie: ${esc(formatAccessTime(item.lastUsedAt))}</p><span class="delegate-access-status${item.active ? ' is-active' : ''}">${item.active ? 'Dostęp aktywny' : 'Dostęp nieaktywny'}</span></div>
+      <div class="delegate-access-actions"><button type="button" data-issue-delegate="${esc(item.memberId)}">${item.active ? 'Wyślij nowy link' : 'Wyślij dostęp'}</button>${item.active ? `<button class="revoke-access" type="button" data-revoke-delegate="${esc(item.memberId)}">Wyłącz dostęp</button>` : ''}</div>
+    </article>`).join('');
+  }
+
+  async function loadDelegateAccess() {
+    const list = document.getElementById('delegateAccessList');
+    list.innerHTML = '<p class="empty-message">Pobieranie dostępu…</p>';
+    try {
+      const result = await window.LEAP_PORTAL_STORE.getDelegateAccessList();
+      renderDelegateAccess(result.items || []);
+      delegateAccessLoaded = true;
+    } catch (error) {
+      list.innerHTML = `<p class="empty-message">${esc(error.message || 'Nie udało się pobrać dostępów.')}</p>`;
+      if (error.code === 'unauthorized') {
+        sessionStorage.removeItem(COORDINATOR_SESSION_KEY);
+        setTimeout(() => location.replace(`portal-coordinator-login.html?v=${VERSION}`), 1800);
+      }
+    }
+  }
+
   document.querySelector('.edit-tabs').addEventListener('click', event => {
     const button = event.target.closest('[data-edit-view]');
     if (!button) return;
     document.querySelectorAll('[data-edit-view]').forEach(item => item.classList.toggle('active', item === button));
     document.querySelectorAll('[data-edit-panel]').forEach(panel => { panel.hidden = panel.dataset.editPanel !== button.dataset.editView; });
     status.textContent = '';
+    if (button.dataset.editView === 'access' && !delegateAccessLoaded) loadDelegateAccess();
   });
 
   dayAction.addEventListener('change', updateDayMode);
@@ -392,6 +454,10 @@
     const block = data.blocks.find(item => item.id === dayBlock.value);
     const pendingIds = (currentAttendance?.items || []).filter(item => item.status === 'pending').map(item => item.memberId);
     if (block && pendingIds.length) openMailComposer(attendanceReminderDraft(block, pendingIds));
+  });
+  attendanceLeadAccess.addEventListener('click', () => {
+    const block = data.blocks.find(item => item.id === dayBlock.value);
+    if (block?.clinicalLeadId) openMailComposer(leadAccessDraft(block));
   });
   dayLead.addEventListener('change', () => renderInvitees(selectedInviteIds()));
   dayInvitees.addEventListener('change', updateInviteSummary);
@@ -527,6 +593,40 @@
   });
 
   document.addEventListener('click', async event => {
+    const issueButton = event.target.closest('[data-issue-delegate]');
+    if (issueButton) {
+      const memberId = issueButton.dataset.issueDelegate;
+      const name = personName(memberId);
+      if (!confirm(`Wysłać indywidualny link do panelu prowadzącego dla: ${name}? Poprzedni link tej osoby przestanie działać.`)) return;
+      issueButton.disabled = true;
+      status.textContent = `Wysyłanie dostępu: ${name}…`;
+      try {
+        await window.LEAP_PORTAL_STORE.issueDelegateAccess(memberId);
+        status.textContent = `Wysłano indywidualny link: ${name}.`;
+        await loadDelegateAccess();
+      } catch (error) {
+        status.textContent = error.message || 'Nie udało się wysłać dostępu.';
+        issueButton.disabled = false;
+      }
+      return;
+    }
+    const revokeButton = event.target.closest('[data-revoke-delegate]');
+    if (revokeButton) {
+      const memberId = revokeButton.dataset.revokeDelegate;
+      const name = personName(memberId);
+      if (!confirm(`Wyłączyć dostęp dla: ${name}? Osoba nie będzie mogła otworzyć dotychczasowego linku.`)) return;
+      revokeButton.disabled = true;
+      status.textContent = `Wyłączanie dostępu: ${name}…`;
+      try {
+        await window.LEAP_PORTAL_STORE.revokeDelegateAccess(memberId);
+        status.textContent = `Dostęp wyłączony: ${name}.`;
+        await loadDelegateAccess();
+      } catch (error) {
+        status.textContent = error.message || 'Nie udało się wyłączyć dostępu.';
+        revokeButton.disabled = false;
+      }
+      return;
+    }
     const taskButton = event.target.closest('[data-complete-task]');
     if (taskButton) {
       const task = data.tasks.find(item => item.id === taskButton.dataset.completeTask);

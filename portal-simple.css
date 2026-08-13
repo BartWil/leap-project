@@ -265,21 +265,22 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .edit-main { width: min(940px, 100%); }
 .edit-tabs {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
   margin-bottom: 22px;
   border: 1px solid var(--ink);
+  background: var(--ink);
 }
 .edit-tabs button {
   padding: 14px 10px;
   border: 0;
-  border-right: 1px solid var(--ink);
+  border: 0;
   background: var(--white);
   color: var(--ink);
   cursor: pointer;
   font-size: 13px;
   font-weight: 700;
 }
-.edit-tabs button:last-child { border-right: 0; }
 .edit-tabs button.active { background: var(--ink); color: var(--white); }
 
 .save-status {
@@ -426,7 +427,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .attendance-status.is-yes { color: #176b4d; background: #edf8f3; }
 .attendance-status.is-no { color: #8b3028; background: #fff0ee; }
 .attendance-status.is-pending { color: #80601d; background: #fff8e8; }
-.attendance-actions { margin-top: 18px; }
+.attendance-actions { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 18px; }
 .attendance-help { margin: 10px 0 0; color: var(--muted); font-size: 12px; line-height: 1.5; }
 .row-action {
   padding: 7px 9px;
@@ -471,6 +472,15 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .mail-send-status { margin: 0; }
 .mail-dialog-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
 .mail-dialog-actions .quiet-button { padding: 12px 14px; border: 1px solid var(--ink); }
+.delegate-access-list { display: grid; gap: 12px; }
+.delegate-access-card { display: grid; grid-template-columns: 1fr auto; gap: 18px; align-items: center; padding: 18px; border: 1px solid var(--line); }
+.delegate-access-card h3 { margin: 0 0 5px; font: 600 18px var(--display); }
+.delegate-access-card p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.5; }
+.delegate-access-status { display: inline-block; margin-top: 9px; padding: 5px 8px; background: #fff8e8; color: #80601d; font-size: 10px; font-weight: 700; }
+.delegate-access-status.is-active { background: #edf8f3; color: #176b4d; }
+.delegate-access-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+.delegate-access-actions button { padding: 10px 12px; border: 1px solid var(--ink); background: var(--ink); color: var(--white); cursor: pointer; font-size: 11px; font-weight: 700; }
+.delegate-access-actions .revoke-access { background: transparent; color: #8b3028; border-color: #8b3028; }
 
 @media (max-width: 760px) {
   .simple-header { align-items: flex-start; }
@@ -482,16 +492,14 @@ button, a { -webkit-tap-highlight-color: transparent; }
   .researcher-floor-plan-card { grid-template-columns: 1fr; align-items: start; }
   .researcher-floor-plan-card .primary-link { justify-self: start; white-space: normal; }
   .edit-tabs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .edit-tabs button:nth-child(2) { border-right: 0; }
-  .edit-tabs button:nth-child(-n+4) { border-bottom: 1px solid var(--ink); }
-  .edit-tabs button:nth-child(4) { border-right: 0; }
-  .edit-tabs button:last-child { grid-column: 1 / -1; }
   .edit-form { grid-template-columns: 1fr; }
   .edit-form .field-wide { grid-column: auto; }
   .invite-list { grid-template-columns: 1fr; }
   .mail-recipient-list { grid-template-columns: 1fr; }
   .attendance-card { padding: 18px; }
   .attendance-heading, .attendance-list li { align-items: flex-start; }
+  .delegate-access-card { grid-template-columns: 1fr; }
+  .delegate-access-actions { justify-content: flex-start; }
   .glossary-item { grid-template-columns: 1fr; gap: 9px; }
 }
 

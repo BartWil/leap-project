@@ -317,6 +317,7 @@
         missing_contacts: 'Nie wszystkie wybrane osoby mają zapisany adres e-mail.',
         mail_quota_exceeded: 'Dzisiejszy limit wysyłki Google został wyczerpany.',
         invalid_rsvp_request: 'Nie udało się utworzyć bezpiecznych linków potwierdzenia.',
+        invalid_lead_access_request: 'Dostęp może zostać wysłany wyłącznie aktualnej osobie prowadzącej ten dzień.',
         rsvp_block_not_found: 'Nie znaleziono aktualnego dnia badawczego dla tej wiadomości.',
         mail_send_failed: 'Google nie potwierdził wysyłki. Najpierw sprawdź skrzynkę projektu i nie klikaj ponownie, aby uniknąć duplikatu.'
       };
@@ -346,6 +347,121 @@
     }
     return result;
   }
+
+  async function getDelegateData(token) {
+    const result = await jsonp('delegate-data', { token: String(token || '') });
+    if (!result?.ok) throw delegateError(result?.error);
+    return result;
+  }
+
+  async function getDelegateAttendance(token, blockId) {
+    const result = await jsonp('delegate-attendance', { token: String(token || ''), blockId: String(blockId || '') });
+    if (!result?.ok) throw delegateError(result?.error);
+    return result;
+  }
+
+  async function saveDelegateDay(token, block, expectedRevision) {
+    const id = requestId();
+    await post({
+      action: 'delegate-save-day',
+      requestId: id,
+      token: String(token || ''),
+      expectedRevision: Number(expectedRevision || 0),
+      block
+    });
+    const result = await waitForStatus('operation-status', id);
+    if (!result?.ok) throw delegateError(result?.error);
+    return result;
+  }
+
+  async function sendDelegateEmail(token, draft) {
+    const id = requestId();
+    await post({
+      action: 'delegate-send-email',
+      requestId: id,
+      token: String(token || ''),
+      clientMessageId: String(draft.clientMessageId || ''),
+      blockId: String(draft.blockId || ''),
+      recipientIds: Array.isArray(draft.recipientIds) ? draft.recipientIds : [],
+      subject: String(draft.subject || ''),
+      body: String(draft.body || ''),
+      category: String(draft.category || '')
+    });
+    const result = await waitForStatus('operation-status', id);
+    if (!result?.ok) throw delegateError(result?.error, result);
+    return result;
+  }
+
+  function delegateError(code, details = {}) {
+    const messages = {
+      invalid_delegate_access: 'Ten link dostępu jest nieprawidłowy.',
+      delegate_access_expired: 'Ten dostęp został wyłączony lub zastąpiony nowym linkiem.',
+      forbidden_scope: 'Nie masz uprawnień do zmiany tego rodzaju dnia.',
+      revision_conflict: 'Ktoś zapisał nowszą zmianę. Odśwież panel i spróbuj ponownie.',
+      invalid_weekday: 'Dzień badawczy musi przypadać w czwartek albo piątek.',
+      invalid_delegate_day: 'Sprawdź datę, godziny, miejsce, prowadzącego i zaproszony zespół.',
+      invalid_email_draft: 'Sprawdź odbiorców, temat i treść wiadomości.',
+      invalid_reminder_recipients: 'Przypomnienie może trafić wyłącznie do osób bez odpowiedzi.',
+      missing_contacts: 'Nie wszystkie wybrane osoby mają aktywny adres e-mail.',
+      mail_quota_exceeded: 'Dzisiejszy limit wysyłki Google został wyczerpany.',
+      mail_send_failed: 'Google nie potwierdził wysyłki. Sprawdź skrzynkę projektu przed ponowną próbą.',
+      rsvp_block_not_found: 'Nie znaleziono tego dnia badawczego.',
+      state_not_initialized: 'Wspólne dane portalu nie są jeszcze gotowe.'
+    };
+    const error = new Error(messages[code] || 'Nie udało się wykonać tej operacji.');
+    error.code = code || 'delegate_operation_failed';
+    error.missingRecipientIds = Array.isArray(details?.missingRecipientIds) ? details.missingRecipientIds : [];
+    return error;
+  }
+
+  async function getDelegateAccessList() {
+    const token = coordinatorToken();
+    if (!token) throw delegateError('unauthorized');
+    const result = await jsonp('delegate-access-list', { token });
+    if (!result?.ok) {
+      if (result?.error === 'unauthorized') clearCoordinatorToken();
+      const error = result?.error === 'unauthorized'
+        ? new Error('Sesja koordynatora wygasła. Zaloguj się ponownie.')
+        : delegateError(result?.error);
+      error.code = result?.error || 'delegate_access_list_failed';
+      throw error;
+    }
+    return result;
+  }
+
+  async function changeDelegateAccess(action, memberId) {
+    const token = coordinatorToken();
+    if (!token) {
+      const error = new Error('Sesja koordynatora wygasła. Zaloguj się ponownie.');
+      error.code = 'unauthorized';
+      throw error;
+    }
+    const id = requestId();
+    await post({
+      action,
+      requestId: id,
+      token,
+      memberId: String(memberId || ''),
+      clientMessageId: action === 'issue-delegate-access' ? requestId() : ''
+    });
+    const result = await waitForStatus('operation-status', id);
+    if (!result?.ok) {
+      if (result?.error === 'unauthorized') clearCoordinatorToken();
+      const messages = {
+        unauthorized: 'Sesja koordynatora wygasła. Zaloguj się ponownie.',
+        invalid_delegate: 'Ta osoba nie ma skonfigurowanego zakresu prowadzącego.',
+        mail_quota_exceeded: 'Dzisiejszy limit wysyłki Google został wyczerpany.',
+        mail_send_failed: 'Nie udało się wysłać indywidualnego linku. Poprzedni dostęp pozostał bez zmian.'
+      };
+      const error = new Error(messages[result?.error] || 'Nie udało się zmienić dostępu.');
+      error.code = result?.error || 'delegate_access_change_failed';
+      throw error;
+    }
+    return result;
+  }
+
+  const issueDelegateAccess = memberId => changeDelegateAccess('issue-delegate-access', memberId);
+  const revokeDelegateAccess = memberId => changeDelegateAccess('revoke-delegate-access', memberId);
 
   async function initializeSharedState() {
     const remote = await fetchRemoteState();
@@ -394,6 +510,13 @@
     save,
     sendEmail,
     getAttendanceStatus,
+    getDelegateData,
+    getDelegateAttendance,
+    saveDelegateDay,
+    sendDelegateEmail,
+    getDelegateAccessList,
+    issueDelegateAccess,
+    revokeDelegateAccess,
     watch,
     getStatus,
     isConfigured,
