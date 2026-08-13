@@ -111,6 +111,30 @@
     return `leap-${Date.now()}-${Array.from(values, value => value.toString(16).padStart(8, '0')).join('')}`;
   }
 
+  async function fetchJson(action, parameters = {}) {
+    const url = new URL(endpoint());
+    url.searchParams.set('action', action);
+    url.searchParams.set('_', String(Date.now()));
+    Object.entries(parameters).forEach(([key, value]) => url.searchParams.set(key, String(value)));
+    const controller = typeof AbortController === 'function' ? new AbortController() : null;
+    const timeout = setTimeout(() => controller?.abort(), Number(syncConfig().requestTimeoutMs || 15000));
+    try {
+      const response = await fetch(url.toString(), {
+        method: 'GET',
+        cache: 'no-store',
+        credentials: 'omit',
+        redirect: 'follow',
+        signal: controller?.signal
+      });
+      if (!response.ok) throw new Error(`Błąd połączenia: ${response.status}`);
+      return await response.json();
+    } catch (error) {
+      throw new Error('Nie udało się połączyć ze wspólnymi danymi. Otwórz link w Chrome, Safari lub Edge i spróbuj ponownie.');
+    } finally {
+      clearTimeout(timeout);
+    }
+  }
+
   function jsonp(action, parameters = {}) {
     if (!isConfigured()) return Promise.reject(new Error('Synchronizacja nie została jeszcze podłączona.'));
     const callbackName = `_leapSync${Date.now()}${Math.random().toString(36).slice(2)}`;
@@ -122,7 +146,8 @@
 
     return new Promise((resolve, reject) => {
       const script = document.createElement('script');
-      const timeout = setTimeout(() => finish(() => reject(new Error('Przekroczono czas oczekiwania na synchronizację.'))), Number(syncConfig().requestTimeoutMs || 15000));
+      const retryWithFetch = () => fetchJson(action, parameters).then(resolve, reject);
+      const timeout = setTimeout(() => finish(retryWithFetch), Number(syncConfig().requestTimeoutMs || 15000));
 
       function finish(callback) {
         clearTimeout(timeout);
@@ -132,7 +157,7 @@
       }
 
       window[callbackName] = result => finish(() => resolve(result));
-      script.onerror = () => finish(() => reject(new Error('Nie udało się połączyć ze wspólnymi danymi.')));
+      script.onerror = () => finish(retryWithFetch);
       script.src = url.toString();
       script.async = true;
       document.head.appendChild(script);
