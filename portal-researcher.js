@@ -4,7 +4,7 @@
   const SESSION_KEY = 'leap-portal-authenticated';
   const COORDINATOR_SESSION_KEY = 'leap-coordinator-authenticated';
   const RESEARCHER_KEY = 'leap-researcher-id';
-  const VERSION = '20260813-2';
+  const VERSION = '20260813-3';
 
   if (sessionStorage.getItem(SESSION_KEY) !== 'true') {
     location.replace(`portal.html?v=${VERSION}`);

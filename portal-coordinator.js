@@ -3,7 +3,7 @@
 
   const SESSION_KEY = 'leap-portal-authenticated';
   const COORDINATOR_SESSION_KEY = 'leap-coordinator-authenticated';
-  const VERSION = '20260813-2';
+  const VERSION = '20260813-3';
 
   if (sessionStorage.getItem(SESSION_KEY) !== 'true') {
     location.replace(`portal.html?v=${VERSION}`);
@@ -14,83 +14,156 @@
     return;
   }
 
-  const data = await window.LEAP_PORTAL_STORE.load();
-  const esc = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
-  const personName = id => data.team.find(person => person.id === id)?.name || 'Nieprzypisano';
-  const stationName = id => data.stations.find(station => station.id === id)?.name || id;
-  const typeLabel = value => value === 'Mixed' ? 'Blok mieszany' : value === 'LASER' ? 'Laser/sham' : value;
-  const formatDate = value => new Intl.DateTimeFormat('pl-PL', { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date(`${value}T12:00:00`));
-  const formatShortDate = value => new Intl.DateTimeFormat('pl-PL', { day: '2-digit', month: '2-digit' }).format(new Date(`${value}T12:00:00`));
+  const store = window.LEAP_PORTAL_STORE;
   const syncStatus = document.getElementById('coordinatorSyncStatus');
+  const esc = value => String(value ?? '').replace(/[&<>"']/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[character]);
+  let data;
+  let control;
+  let dayFilter = 'all';
+  let activityFilter = 'changes';
+
+  try {
+    [data, control] = await Promise.all([store.load({ force: true }), store.getControlCenterData()]);
+  } catch (error) {
+    syncStatus.textContent = error.message || 'Nie udało się pobrać Centrum kontroli.';
+    syncStatus.classList.add('sync-warning');
+    if (error.code === 'unauthorized') {
+      sessionStorage.removeItem(COORDINATOR_SESSION_KEY);
+      setTimeout(() => location.replace(`portal-coordinator-login.html?v=${VERSION}`), 1800);
+    }
+    document.documentElement.classList.remove('auth-pending');
+    return;
+  }
+
+  const personName = id => data.team.find(person => person.id === id)?.name || id || 'Nieprzypisano';
+  const typeLabel = value => value === 'Mixed' ? 'Blok mieszany' : value === 'LASER' ? 'Laser/sham' : value;
+  const localDateKey = () => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  };
+  const today = localDateKey();
+  const formatDate = value => new Intl.DateTimeFormat('pl-PL', { weekday: 'short', day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date(`${value}T12:00:00`));
+  const formatMoment = value => value ? new Intl.DateTimeFormat('pl-PL', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(value)) : 'brak danych';
+  const daysUntil = value => Math.round((new Date(`${value}T12:00:00`) - new Date(`${today}T12:00:00`)) / 86400000);
+  const attendanceFor = block => control.attendanceByBlock?.[block.id] || { counts: { yes: 0, no: 0, pending: (block.invitedMemberIds || []).length }, items: [] };
+  const editDayUrl = blockId => `portal-coordinator-edit.html?v=${VERSION}&view=days&block=${encodeURIComponent(blockId)}`;
 
   function renderSyncStatus() {
-    const current = window.LEAP_PORTAL_STORE.getStatus();
-    const updated = current.updatedAt
-      ? new Intl.DateTimeFormat('pl-PL', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(current.updatedAt))
-      : '';
-    syncStatus.textContent = current.online
-      ? current.initialized
-        ? `Wspólne dane aktualne${updated ? ` · ostatnia zmiana ${updated}` : ''}`
-        : 'Wspólne dane oczekują na pierwszy zapis.'
-      : `Brak połączenia · wyświetlam: ${current.source}`;
-    syncStatus.classList.toggle('sync-warning', !current.online);
+    const status = store.getStatus();
+    const updated = control.updatedAt ? formatMoment(control.updatedAt) : '';
+    syncStatus.textContent = status.online
+      ? `Wspólne dane aktualne${updated ? ` · ostatnia zmiana ${updated}` : ''}`
+      : `Brak połączenia · wyświetlam: ${status.source}`;
+    syncStatus.classList.toggle('sync-warning', !status.online);
   }
 
-  const today = new Date().toISOString().slice(0, 10);
-  const sortedBlocks = [...data.blocks].sort((a, b) => a.date.localeCompare(b.date));
-  const nextBlock = sortedBlocks.find(block => block.date >= today) || sortedBlocks[sortedBlocks.length - 1];
-  const missingBackups = nextBlock.stationAssignments.filter(item => !item.backupMemberId);
-  const invitedNames = (nextBlock.invitedMemberIds || []).map(personName);
-  document.getElementById('coordinatorReadiness').textContent = `gotowość ${nextBlock.readinessScore}%`;
-  document.getElementById('coordinatorNextDay').innerHTML = `<div class="item-row"><div><strong>${esc(formatDate(nextBlock.date))}, ${esc(nextBlock.startTime)}–${esc(nextBlock.endTime)}</strong><p>${esc(typeLabel(nextBlock.type))} · ${esc(nextBlock.location)}</p><p>Osoba prowadząca część kliniczną: <b>${esc(personName(nextBlock.clinicalLeadId))}</b></p><p>Zaproszony zespół: <b>${invitedNames.length ? invitedNames.map(esc).join(', ') : 'jeszcze nikt'}</b></p><p id="coordinatorAttendance">Potwierdzenia: pobieranie…</p><p>${esc(nextBlock.notes)}</p></div><div class="item-meta"><span class="status ${nextBlock.readinessScore < 75 ? 'status-danger' : ''}">${esc(nextBlock.status === 'Ready with warnings' ? 'Gotowy z uwagami' : nextBlock.status)}</span><br>${invitedNames.length} ${invitedNames.length === 1 ? 'zaproszona osoba' : invitedNames.length < 5 ? 'zaproszone osoby' : 'zaproszonych osób'}<br>${nextBlock.participantIds.length} uczestników<br>${missingBackups.length} ${missingBackups.length === 1 ? 'brak zastępstwa' : 'braki zastępstw'}</div></div>`;
-  let nextAttendance = null;
-  try {
-    nextAttendance = await window.LEAP_PORTAL_STORE.getAttendanceStatus(nextBlock.id);
-    document.getElementById('coordinatorAttendance').innerHTML = `Potwierdzenia: <b>${nextAttendance.counts.yes} będzie</b> · <b>${nextAttendance.counts.no} nie może</b> · ${nextAttendance.counts.pending} bez odpowiedzi`;
-  } catch {
-    document.getElementById('coordinatorAttendance').textContent = 'Potwierdzenia: nie udało się pobrać.';
+  const upcoming = data.blocks
+    .filter(block => block.date >= today && block.status !== 'Cancelled')
+    .sort((a, b) => a.date.localeCompare(b.date) || a.startTime.localeCompare(b.startTime));
+
+  function buildAlerts() {
+    const alerts = [];
+    upcoming.forEach(block => {
+      const distance = daysUntil(block.date);
+      const attendance = attendanceFor(block).counts;
+      const invited = block.invitedMemberIds || [];
+      const blockActivity = (control.activity || []).filter(item => item.blockId === block.id);
+      const latestChange = blockActivity.find(item => ['day-created', 'day-updated', 'day-restored'].includes(item.event));
+      const latestMail = blockActivity.find(item => item.event === 'email-sent');
+      if (latestChange && (!latestMail || new Date(latestMail.createdAt) < new Date(latestChange.createdAt))) {
+        alerts.push({ priority: 0, tone: 'danger', title: `${formatDate(block.date)} · zmiana bez potwierdzonej wysyłki`, text: 'Termin lub obsada zostały zapisane później niż ostatni e-mail. Sprawdź i przygotuj wiadomość do zespołu.', blockId: block.id });
+      }
+      if (distance <= 21 && invited.length <= 1) {
+        alerts.push({ priority: 0, tone: 'danger', title: `${formatDate(block.date)} · ${typeLabel(block.type)} — obsada do uzupełnienia`, text: 'Zaproszona jest tylko osoba prowadząca. Sprawdź skład zespołu.', blockId: block.id });
+      }
+      if (distance <= 14 && attendance.no > 0) {
+        alerts.push({ priority: 1, tone: 'danger', title: `${attendance.no} ${attendance.no === 1 ? 'osoba nie może przybyć' : 'osoby nie mogą przybyć'}`, text: `${formatDate(block.date)} · ${typeLabel(block.type)}. Sprawdź, czy obsada nadal wystarcza.`, blockId: block.id });
+      }
+      if (distance <= 7 && attendance.pending > 0) {
+        alerts.push({ priority: 2, tone: 'warning', title: `${attendance.pending} ${attendance.pending === 1 ? 'osoba bez odpowiedzi' : 'osób bez odpowiedzi'}`, text: `${formatDate(block.date)} · ${typeLabel(block.type)}. Warto przygotować przypomnienie.`, blockId: block.id });
+      }
+    });
+    return alerts.sort((a, b) => a.priority - b.priority || a.title.localeCompare(b.title));
   }
 
-  function limitedList(items, renderItem, emptyText, limit = 3) {
-    if (!items.length) return `<li><p class="empty-message">${esc(emptyText)}</p></li>`;
-    const visible = items.slice(0, limit).map(renderItem).join('');
-    const remaining = items.slice(limit);
-    if (!remaining.length) return visible;
-    return `${visible}<li><details class="more-items"><summary>Pokaż pozostałe (${remaining.length})</summary><ul class="plain-list">${remaining.map(renderItem).join('')}</ul></details></li>`;
+  const alerts = buildAlerts();
+  const totalPending = upcoming.reduce((sum, block) => sum + Number(attendanceFor(block).counts.pending || 0), 0);
+  const activeAccesses = (control.accesses || []).filter(item => item.active).length;
+  document.getElementById('summaryUpcoming').textContent = upcoming.length;
+  document.getElementById('summaryAttention').textContent = alerts.length;
+  document.getElementById('summaryPending').textContent = totalPending;
+  document.getElementById('summaryAccess').textContent = activeAccesses;
+  document.getElementById('attentionCount').textContent = alerts.length ? `${alerts.length} spraw` : 'bez działania';
+  document.getElementById('controlAttention').innerHTML = alerts.length
+    ? alerts.map(alert => `<article class="control-alert is-${esc(alert.tone)}"><div><strong>${esc(alert.title)}</strong><p>${esc(alert.text)}</p></div><a href="${esc(alert.blockId ? editDayUrl(alert.blockId) : alert.href)}">Sprawdź</a></article>`).join('')
+    : '<div class="control-all-good"><strong>Bez działania</strong><p>Na ten moment nie wykryto spraw wymagających pilnej reakcji.</p></div>';
+
+  function dayMatches(block) {
+    if (dayFilter === 'all') return true;
+    if (dayFilter === 'other') return !['T0', 'W12', 'LASER'].includes(block.type);
+    return block.type === dayFilter;
   }
 
-  const priorityOrder = { Critical: 0, High: 1, Medium: 2, Low: 3 };
-  const tasks = data.tasks.filter(item => item.status !== 'Completed').sort((a, b) => (priorityOrder[a.priority] ?? 9) - (priorityOrder[b.priority] ?? 9) || a.dueDate.localeCompare(b.dueDate));
-  document.getElementById('coordinatorTaskCount').textContent = `${tasks.length} otwartych`;
-  document.getElementById('coordinatorTasks').innerHTML = limitedList(tasks, item => `<li><div class="item-row"><div><strong>${esc(item.description)}</strong><p>Odpowiada: ${esc(personName(item.ownerId))} · ${esc(item.subject)}</p></div><div class="item-meta"><span class="status ${item.status === 'Overdue' || item.priority === 'Critical' ? 'status-danger' : ''}">${esc(item.status === 'Overdue' ? 'Po terminie' : item.priority === 'Critical' ? 'Pilne' : item.status === 'In progress' ? 'W trakcie' : 'Do zrobienia')}</span><br>termin ${esc(formatShortDate(item.dueDate))}</div></div></li>`, 'Brak otwartych zadań.');
+  function renderDays() {
+    const visible = upcoming.filter(dayMatches);
+    document.getElementById('controlDays').innerHTML = visible.length
+      ? visible.map(block => {
+        const counts = attendanceFor(block).counts;
+        const distance = daysUntil(block.date);
+        const timeLabel = distance === 0 ? 'dzisiaj' : distance === 1 ? 'jutro' : `za ${distance} dni`;
+        return `<article class="control-day"><div class="control-day-date"><strong>${esc(formatDate(block.date))}</strong><span>${esc(timeLabel)}</span></div><div class="control-day-main"><strong>${esc(typeLabel(block.type))} · ${esc(block.startTime)}–${esc(block.endTime)}</strong><p>${esc(block.location)} · prowadzi: ${esc(personName(block.clinicalLeadId))}</p><small>Zaproszono ${(block.invitedMemberIds || []).length} osób</small></div><div class="control-rsvp"><span class="yes"><b>${counts.yes}</b> TAK</span><span class="no"><b>${counts.no}</b> NIE</span><span class="pending"><b>${counts.pending}</b> brak</span></div><a class="control-open" href="${esc(editDayUrl(block.id))}">Otwórz</a></article>`;
+      }).join('')
+      : '<div class="control-empty">Brak najbliższych terminów w tym filtrze.</div>';
+  }
 
-  const decisions = [];
-  if (nextAttendance?.counts.no) decisions.push({ title: `${nextAttendance.counts.no} ${nextAttendance.counts.no === 1 ? 'osoba nie może przybyć' : 'osoby nie mogą przybyć'}`, text: `Sprawdź obsadę dnia ${formatDate(nextBlock.date)}.` });
-  if (nextAttendance?.counts.pending) decisions.push({ title: `${nextAttendance.counts.pending} ${nextAttendance.counts.pending === 1 ? 'osoba nie odpowiedziała' : 'osób nie odpowiedziało'}`, text: `Możesz wysłać przypomnienie z panelu edycji dnia ${formatDate(nextBlock.date)}.` });
-  data.blocks.filter(block => block.status === 'Staffing gap' || block.readinessScore < 70).forEach(block => decisions.push({ title: `${formatDate(block.date)} — gotowość ${block.readinessScore}%`, text: block.notes }));
-  data.dataQueries.filter(query => query.status === 'Overdue').forEach(query => decisions.push({ title: `${query.fieldOrFile} — po terminie`, text: `${query.description} Odpowiada: ${personName(query.assignedToId)}.` }));
-  const vacancy = data.team.find(person => person.status === 'Vacant');
-  if (vacancy) decisions.push({ title: 'Nieobsadzona rola', text: `Koordynator danych i dokumentacji. ${vacancy.notesPublic}` });
-  missingBackups.forEach(item => decisions.push({ title: `Brak zastępstwa: ${stationName(item.stationId)}`, text: `${formatDate(nextBlock.date)}, ${item.startTime}–${item.endTime}. Osoba główna: ${personName(item.memberId)}.` }));
-  document.getElementById('coordinatorDecisionCount').textContent = decisions.length;
-  document.getElementById('coordinatorDecisions').innerHTML = limitedList(decisions, item => `<li><strong>${esc(item.title)}</strong><p class="empty-message">${esc(item.text)}</p></li>`, 'Brak problemów wymagających decyzji.');
+  function renderActivity() {
+    const list = document.getElementById('controlActivity');
+    if (activityFilter === 'mail') {
+      const mail = (control.mail || []).filter(item => !item.isTest).slice(0, 15);
+      list.innerHTML = mail.length
+        ? mail.map(item => `<li><time>${esc(formatMoment(item.sentAt))}</time><div><strong>${esc(item.subject)}</strong><p>Wysłano do ${item.recipientCount} ${item.recipientCount === 1 ? 'osoby' : 'osób'}.</p></div></li>`).join('')
+        : '<li class="control-empty">Brak zarejestrowanych wysyłek.</li>';
+      return;
+    }
+    const activity = (control.activity || []).slice(0, 15);
+    list.innerHTML = activity.length
+      ? activity.map(item => `<li><time>${esc(formatMoment(item.createdAt))}</time><div><strong>${esc(item.summary)}</strong><p>${esc(item.actorName || personName(item.actorId))}${item.details ? ` · ${esc(item.details)}` : ''}</p></div>${item.blockId ? `<a href="${esc(editDayUrl(item.blockId))}">Otwórz</a>` : ''}</li>`).join('')
+      : '<li class="control-empty">Historia zmian zacznie się pojawiać po pierwszej zmianie wykonanej w nowej wersji.</li>';
+  }
 
-  const queries = data.dataQueries.filter(item => item.status !== 'Resolved').sort((a, b) => a.dueDate.localeCompare(b.dueDate));
-  document.getElementById('coordinatorQueryCount').textContent = `${queries.length} do uzupełnienia`;
-  document.getElementById('coordinatorQueries').innerHTML = limitedList(queries, item => `<li><div class="item-row"><div><strong>${esc(item.fieldOrFile)}</strong><p>${esc(item.description)} · Odpowiada: ${esc(personName(item.assignedToId))}</p></div><div class="item-meta"><span class="status ${item.status === 'Overdue' ? 'status-danger' : ''}">${esc(item.status === 'Overdue' ? 'Po terminie' : item.status === 'In progress' ? 'W trakcie' : 'Otwarte')}</span><br>termin ${esc(formatShortDate(item.dueDate))}</div></div></li>`, 'Brak otwartych braków danych.');
+  function renderAccess() {
+    const accesses = control.accesses || [];
+    document.getElementById('controlAccess').innerHTML = accesses.length
+      ? accesses.map(item => `<article class="control-access"><div><strong>${esc(item.name)}</strong><p>${esc(item.scopeLabel)}</p></div><span class="access-state${item.active ? ' is-active' : ''}">${item.active ? 'Aktywny' : 'Nieaktywny'}</span><small>Ostatnie użycie:<br><b>${esc(item.lastUsedAt ? formatMoment(item.lastUsedAt) : 'jeszcze nie użyto')}</b></small></article>`).join('')
+      : '<div class="control-empty">Brak skonfigurowanych dostępów prowadzących.</div>';
+  }
 
+  document.getElementById('controlDayFilters').addEventListener('click', event => {
+    const button = event.target.closest('[data-day-filter]');
+    if (!button) return;
+    dayFilter = button.dataset.dayFilter;
+    document.querySelectorAll('[data-day-filter]').forEach(item => item.classList.toggle('active', item === button));
+    renderDays();
+  });
+  document.getElementById('activityFilters').addEventListener('click', event => {
+    const button = event.target.closest('[data-activity-filter]');
+    if (!button) return;
+    activityFilter = button.dataset.activityFilter;
+    document.querySelectorAll('[data-activity-filter]').forEach(item => item.classList.toggle('active', item === button));
+    renderActivity();
+  });
+  document.getElementById('coordinatorRefresh').addEventListener('click', () => location.reload());
   document.getElementById('coordinatorLock').addEventListener('click', () => {
     sessionStorage.removeItem(COORDINATOR_SESSION_KEY);
-    window.LEAP_PORTAL_STORE.clearCoordinatorToken();
+    store.clearCoordinatorToken();
     location.replace(`portal-start.html?v=${VERSION}`);
   });
+  window.addEventListener('storage', event => { if (event.key === store.storageKey) location.reload(); });
+  store.watch(() => location.reload());
 
-  window.addEventListener('storage', event => {
-    if (event.key === window.LEAP_PORTAL_STORE.storageKey) location.reload();
-  });
-
-  window.LEAP_PORTAL_STORE.watch(() => location.reload());
-
-  document.documentElement.classList.remove('auth-pending');
+  renderDays();
+  renderActivity();
+  renderAccess();
   renderSyncStatus();
+  document.documentElement.classList.remove('auth-pending');
 })();

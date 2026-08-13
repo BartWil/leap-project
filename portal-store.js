@@ -429,6 +429,27 @@
     return result;
   }
 
+  async function getControlCenterData() {
+    const token = coordinatorToken();
+    if (!token) {
+      const error = new Error('Sesja koordynatora wygasła. Zaloguj się ponownie.');
+      error.code = 'unauthorized';
+      throw error;
+    }
+    const result = await jsonp('control-center-data', { token });
+    if (!result?.ok) {
+      if (result?.error === 'unauthorized') clearCoordinatorToken();
+      const messages = {
+        unauthorized: 'Sesja koordynatora wygasła. Zaloguj się ponownie.',
+        state_not_initialized: 'Wspólne dane portalu nie są jeszcze gotowe.'
+      };
+      const error = new Error(messages[result?.error] || 'Nie udało się pobrać Centrum kontroli.');
+      error.code = result?.error || 'control_center_failed';
+      throw error;
+    }
+    return result;
+  }
+
   async function changeDelegateAccess(action, memberId) {
     const token = coordinatorToken();
     if (!token) {
@@ -515,6 +536,7 @@
     saveDelegateDay,
     sendDelegateEmail,
     getDelegateAccessList,
+    getControlCenterData,
     issueDelegateAccess,
     revokeDelegateAccess,
     watch,

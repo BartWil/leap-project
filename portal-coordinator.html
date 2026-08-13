@@ -4,60 +4,88 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="robots" content="noindex, nofollow, noarchive" />
-  <title>LEAP — panel koordynatorów</title>
-  <meta name="description" content="Prosty panel kontroli i decyzji koordynatorów projektu LEAP." />
+  <title>LEAP — Centrum kontroli</title>
+  <meta name="description" content="Prosty nadrzędny widok terminów, obecności i aktywności projektu LEAP." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Manrope:wght@500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="portal-simple.css?v=20260813-2" />
+  <link rel="stylesheet" href="portal-simple.css?v=20260813-3" />
 </head>
 <body>
   <header class="simple-header">
-    <a class="simple-brand" href="portal-start.html?v=20260813-2"><span aria-hidden="true">L</span>LEAP</a>
+    <a class="simple-brand" href="portal-start.html?v=20260813-3"><span aria-hidden="true">L</span>LEAP</a>
     <div class="header-actions">
-      <a class="header-action-primary" href="portal-coordinator-edit.html?v=20260813-2">Wprowadź zmianę</a>
-      <a class="quiet-link" href="portal-glossary.html?v=20260813-2">Słowniczek</a>
-      <a class="quiet-link" href="portal-start.html?v=20260813-2">Wybór panelu</a>
+      <a class="header-action-primary" href="portal-coordinator-edit.html?v=20260813-3">Wprowadź zmianę</a>
+      <a class="quiet-link" href="portal-glossary.html?v=20260813-3">Słowniczek</a>
+      <button class="quiet-button" id="coordinatorRefresh" type="button">Odśwież</button>
       <button class="quiet-button" id="coordinatorLock" type="button">Zablokuj panel</button>
     </div>
   </header>
 
-  <main class="simple-main">
-    <header class="simple-intro">
+  <main class="simple-main control-main">
+    <header class="simple-intro control-intro">
       <div>
-        <p class="eyebrow">Tylko kontrola i decyzje</p>
-        <h1>Panel koordynatorów</h1>
-        <p>Bartosz i Magda widzą tutaj wyłącznie sprawy, które wymagają przygotowania, reakcji albo decyzji.</p>
+        <p class="eyebrow">Widok Bartka i Magdy</p>
+        <h1>Centrum kontroli</h1>
+        <p>Najpierw wyjątki i problemy. Jeżeli wszystko jest dobrze, wystarczy zielone „bez działania”.</p>
       </div>
     </header>
-    <p class="sync-status" id="coordinatorSyncStatus" role="status" aria-live="polite"></p>
+    <p class="sync-status" id="coordinatorSyncStatus" role="status" aria-live="polite">Pobieranie wspólnych danych…</p>
 
-    <div class="simple-grid">
-      <section class="simple-card card-wide card-blue">
-        <div class="card-heading"><h2>Najbliższy dzień badawczy</h2><small id="coordinatorReadiness"></small></div>
-        <div id="coordinatorNextDay"></div>
-      </section>
+    <section class="control-summary" aria-label="Podsumowanie projektu">
+      <article><strong id="summaryUpcoming">—</strong><span>najbliższe dni</span></article>
+      <article><strong id="summaryAttention">—</strong><span>wymaga reakcji</span></article>
+      <article><strong id="summaryPending">—</strong><span>bez odpowiedzi</span></article>
+      <article><strong id="summaryAccess">—</strong><span>aktywne dostępy</span></article>
+    </section>
 
-      <section class="simple-card">
-        <div class="card-heading"><h2>Zadania wymagające reakcji</h2><small id="coordinatorTaskCount"></small></div>
-        <ul class="plain-list" id="coordinatorTasks"></ul>
-      </section>
+    <section class="control-section control-attention" aria-labelledby="attentionTitle">
+      <div class="control-heading">
+        <div><p class="eyebrow">Najpierw to</p><h2 id="attentionTitle">Wymaga reakcji</h2></div>
+        <span class="control-count" id="attentionCount"></span>
+      </div>
+      <div class="control-alert-list" id="controlAttention"></div>
+    </section>
 
-      <section class="simple-card card-sand">
-        <div class="card-heading"><h2>Problemy do decyzji</h2><span class="decision-count" id="coordinatorDecisionCount"></span></div>
-        <ul class="plain-list" id="coordinatorDecisions"></ul>
-      </section>
+    <section class="control-section" aria-labelledby="daysTitle">
+      <div class="control-heading">
+        <div><p class="eyebrow">Wspólny kalendarz</p><h2 id="daysTitle">Najbliższe dni</h2></div>
+        <a class="quiet-link" href="portal-coordinator-edit.html?v=20260813-3&amp;view=days">Dodaj termin</a>
+      </div>
+      <div class="control-filters" id="controlDayFilters" aria-label="Filtruj rodzaj dnia">
+        <button class="active" type="button" data-day-filter="all">Wszystkie</button>
+        <button type="button" data-day-filter="T0">T0</button>
+        <button type="button" data-day-filter="W12">W12</button>
+        <button type="button" data-day-filter="LASER">Laser/sham</button>
+        <button type="button" data-day-filter="other">Pozostałe</button>
+      </div>
+      <div class="control-day-list" id="controlDays"></div>
+    </section>
 
-      <section class="simple-card card-wide card-sage">
-        <div class="card-heading"><h2>Braki danych</h2><small id="coordinatorQueryCount"></small></div>
-        <ul class="plain-list" id="coordinatorQueries"></ul>
-      </section>
-    </div>
+    <section class="control-section" aria-labelledby="activityTitle">
+      <div class="control-heading">
+        <div><p class="eyebrow">Kto, co i kiedy</p><h2 id="activityTitle">Ostatnia aktywność</h2></div>
+      </div>
+      <div class="control-filters activity-filters" id="activityFilters" aria-label="Rodzaj historii">
+        <button class="active" type="button" data-activity-filter="changes">Zmiany</button>
+        <button type="button" data-activity-filter="mail">Wysłane e-maile</button>
+      </div>
+      <ol class="control-activity-list" id="controlActivity"></ol>
+      <p class="control-history-note">Historia szczegółowych zmian rozpoczyna się od uruchomienia tej wersji Centrum kontroli. Wcześniejsze wysyłki pozostają widoczne w zakładce e-maili.</p>
+    </section>
+
+    <section class="control-section" aria-labelledby="accessTitle">
+      <div class="control-heading">
+        <div><p class="eyebrow">Delegowanie</p><h2 id="accessTitle">Dostępy prowadzących</h2></div>
+        <a class="quiet-link" href="portal-coordinator-edit.html?v=20260813-3&amp;view=access">Zarządzaj dostępami</a>
+      </div>
+      <div class="control-access-list" id="controlAccess"></div>
+    </section>
   </main>
 
-  <script src="portal-data.js?v=20260813-2"></script>
-  <script src="portal-sync-config.js?v=20260813-2"></script>
-  <script src="portal-store.js?v=20260813-2"></script>
-  <script src="portal-coordinator.js?v=20260813-2"></script>
+  <script src="portal-data.js?v=20260813-3"></script>
+  <script src="portal-sync-config.js?v=20260813-3"></script>
+  <script src="portal-store.js?v=20260813-3"></script>
+  <script src="portal-coordinator.js?v=20260813-3"></script>
 </body>
 </html>

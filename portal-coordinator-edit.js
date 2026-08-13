@@ -3,7 +3,7 @@
 
   const SESSION_KEY = 'leap-portal-authenticated';
   const COORDINATOR_SESSION_KEY = 'leap-coordinator-authenticated';
-  const VERSION = '20260813-2';
+  const VERSION = '20260813-3';
 
   if (sessionStorage.getItem(SESSION_KEY) !== 'true') {
     location.replace(`portal.html?v=${VERSION}`);
@@ -647,6 +647,15 @@
   fillDuties();
   renderTasks();
   renderMessages();
+  const requested = new URL(location.href).searchParams;
+  const requestedView = requested.get('view');
+  const requestedTab = document.querySelector(`[data-edit-view="${CSS.escape(requestedView || '')}"]`);
+  if (requestedTab) requestedTab.click();
+  if (requestedView === 'days' && requested.get('block') && data.blocks.some(block => block.id === requested.get('block'))) {
+    dayAction.value = 'edit';
+    refreshDayOptions(requested.get('block'));
+    updateDayMode();
+  }
   setInterval(() => {
     const daysPanelVisible = !document.querySelector('[data-edit-panel="days"]').hidden;
     if (daysPanelVisible && dayAction.value === 'edit' && !mailComposer.open) refreshAttendance();
