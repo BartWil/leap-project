@@ -379,6 +379,17 @@
     return result;
   }
 
+  async function getCoordinatorDelegateData(memberId) {
+    const token = coordinatorToken();
+    if (!token) throw delegateError('unauthorized');
+    const result = await jsonp('coordinator-delegate-data', { token, memberId: String(memberId || '') });
+    if (!result?.ok) {
+      if (result?.error === 'unauthorized') clearCoordinatorToken();
+      throw delegateError(result?.error);
+    }
+    return result;
+  }
+
   async function getDelegateAttendance(token, blockId) {
     const result = await jsonp('delegate-attendance', { token: String(token || ''), blockId: String(blockId || '') });
     if (!result?.ok) throw delegateError(result?.error);
@@ -393,6 +404,20 @@
       token: String(token || ''),
       expectedRevision: Number(expectedRevision || 0),
       block
+    });
+    const result = await waitForStatus('operation-status', id);
+    if (!result?.ok) throw delegateError(result?.error);
+    return result;
+  }
+
+  async function saveDelegateSeries(token, series, expectedRevision) {
+    const id = requestId();
+    await post({
+      action: 'delegate-save-series',
+      requestId: id,
+      token: String(token || ''),
+      expectedRevision: Number(expectedRevision || 0),
+      series
     });
     const result = await waitForStatus('operation-status', id);
     if (!result?.ok) throw delegateError(result?.error);
@@ -423,7 +448,9 @@
       delegate_access_expired: 'Ten dostęp został wyłączony lub zastąpiony nowym linkiem.',
       forbidden_scope: 'Nie masz uprawnień do zmiany tego rodzaju dnia.',
       revision_conflict: 'Ktoś zapisał nowszą zmianę. Odśwież panel i spróbuj ponownie.',
-      invalid_weekday: 'Dzień badawczy musi przypadać w czwartek albo piątek.',
+      invalid_weekday: 'W12 musi przypadać w czwartek albo piątek. Zabieg laser/sham może odbyć się od poniedziałku do soboty.',
+      invalid_participant_codes: 'Wpisz wyłącznie pseudonimizowane kody uczestników, np. 092 lub LEAP-092.',
+      duplicate_series: 'Ta seria została już zapisana. Odśwież panel.',
       invalid_delegate_day: 'Sprawdź datę, godziny, miejsce, prowadzącego i zaproszony zespół.',
       invalid_email_draft: 'Sprawdź odbiorców, temat i treść wiadomości.',
       invalid_reminder_recipients: 'Przypomnienie może trafić wyłącznie do osób bez odpowiedzi.',
@@ -557,8 +584,10 @@
     sendEmail,
     getAttendanceStatus,
     getDelegateData,
+    getCoordinatorDelegateData,
     getDelegateAttendance,
     saveDelegateDay,
+    saveDelegateSeries,
     sendDelegateEmail,
     getDelegateAccessList,
     getControlCenterData,

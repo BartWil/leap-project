@@ -134,7 +134,7 @@
   function renderAccess() {
     const accesses = control.accesses || [];
     document.getElementById('controlAccess').innerHTML = accesses.length
-      ? accesses.map(item => `<article class="control-access"><div><strong>${esc(item.name)}</strong><p>${esc(item.scopeLabel)}</p></div><span class="access-state${item.active ? ' is-active' : ''}">${item.active ? 'Aktywny' : 'Nieaktywny'}</span><small>Ostatnie użycie:<br><b>${esc(item.lastUsedAt ? formatMoment(item.lastUsedAt) : 'jeszcze nie użyto')}</b></small></article>`).join('')
+      ? accesses.map(item => `<article class="control-access"><div><strong>${esc(item.name)}</strong><p>${esc(item.scopeLabel)}</p></div><span class="access-state${item.active ? ' is-active' : ''}">${item.active ? 'Aktywny' : 'Nieaktywny'}</span><small>Ostatnie użycie:<br><b>${esc(item.lastUsedAt ? formatMoment(item.lastUsedAt) : 'jeszcze nie użyto')}</b></small><a class="control-preview" href="portal-lead.html?v=20260813-4&amp;preview=${encodeURIComponent(item.memberId)}">Podgląd panelu →</a></article>`).join('')
       : '<div class="control-empty">Brak skonfigurowanych dostępów prowadzących.</div>';
   }
 

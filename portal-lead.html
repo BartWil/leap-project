@@ -10,8 +10,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Manrope:wght@500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="portal-simple.css?v=20260813-3" />
-  <link rel="stylesheet" href="portal-lead.css?v=20260813-3" />
+  <link rel="stylesheet" href="portal-simple.css?v=20260813-4" />
+  <link rel="stylesheet" href="portal-lead.css?v=20260813-4" />
 </head>
 <body>
   <header class="simple-header lead-header">
@@ -69,7 +69,7 @@
 
         <form class="lead-form" id="leadDayForm">
           <label>Rodzaj dnia<input id="leadDayTypeLabel" type="text" readonly /></label>
-          <label>Data <span class="field-hint">czwartek lub piątek</span><input id="leadDayDate" type="date" required /></label>
+          <label><span id="leadDateLabel">Data</span> <span class="field-hint" id="leadDateHint">czwartek lub piątek</span><input id="leadDayDate" type="date" required /></label>
           <label>Godzina rozpoczęcia<input id="leadDayStart" type="time" required /></label>
           <label>Godzina zakończenia<input id="leadDayEnd" type="time" required /></label>
           <label class="field-wide">Miejsce<input id="leadDayLocation" type="text" maxlength="200" required /></label>
@@ -85,6 +85,13 @@
             <p class="invite-summary" id="leadInviteSummary" aria-live="polite"></p>
           </fieldset>
           <label class="field-wide">Ważna informacja dla zespołu<textarea id="leadDayNotes" rows="3" maxlength="1000"></textarea></label>
+          <section class="field-wide lead-laser-series" id="leadLaserSeries" hidden>
+            <p class="eyebrow">Seria laser/sham</p>
+            <h3>10 zabiegów, automatycznie bez niedziel</h3>
+            <label>Kody uczestników <span class="field-hint">bez imion i nazwisk</span><textarea id="leadLaserParticipants" rows="3" maxlength="420" placeholder="Np. 092, LEAP-093"></textarea></label>
+            <p class="invite-help">Możesz wpisać kilka kodów oddzielonych przecinkiem, spacją lub nową linią. Wszyscy otrzymają ten sam zestaw 10 terminów.</p>
+            <div class="laser-date-preview" id="leadLaserDates" aria-live="polite"></div>
+          </section>
           <div class="field-wide lead-form-actions">
             <button class="lead-primary" id="leadDaySave" type="submit">Zapisz termin</button>
             <button class="danger-button" id="leadDayCancel" type="button" hidden>Odwołaj termin</button>
@@ -130,6 +137,6 @@
 
   <script src="portal-sync-config.js?v=20260813-3"></script>
   <script src="portal-store.js?v=20260813-4"></script>
-  <script src="portal-lead.js?v=20260813-3"></script>
+  <script src="portal-lead.js?v=20260813-4"></script>
 </body>
 </html>

@@ -533,6 +533,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .control-access p { margin: 5px 0 0; color: var(--muted); font-size: 11px; }
 .control-access small { grid-column: 1 / -1; padding-top: 11px; border-top: 1px solid var(--line); color: var(--muted); font-size: 9px; line-height: 1.5; }
 .control-access small b { color: var(--ink); font-size: 10px; }
+.control-preview { grid-column: 1 / -1; justify-self: start; color: var(--ink); border-bottom: 1px solid var(--ink); text-decoration: none; font-size: 11px; font-weight: 700; }
 .access-state { align-self: start; padding: 5px 7px; background: #fff8e8; color: #80601d; font-size: 9px; font-weight: 700; }
 .access-state.is-active { background: #edf8f3; color: #176b4d; }
 

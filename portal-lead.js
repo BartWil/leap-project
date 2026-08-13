@@ -6,6 +6,8 @@
   const clone = value => JSON.parse(JSON.stringify(value));
   const esc = value => String(value ?? '').replace(/[&<>'"]/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' })[character]);
   const tokenFromUrl = new URL(location.href).searchParams.get('access') || '';
+  const previewMemberId = new URL(location.href).searchParams.get('preview') || '';
+  const isCoordinatorPreview = /^(alicja|natalia|filip)$/.test(previewMemberId);
   if (/^[a-f0-9]{64}$/i.test(tokenFromUrl)) {
     localStorage.setItem(TOKEN_KEY, tokenFromUrl);
     const cleanUrl = new URL(location.href);
@@ -17,6 +19,7 @@
   let currentBlock = null;
   let lastChangeCategory = 'research-day-created';
   let mailDraft = null;
+  let laserSeriesMode = false;
 
   const loading = document.getElementById('leadLoading');
   const errorPanel = document.getElementById('leadError');
@@ -69,9 +72,13 @@
 
   function dayCard(block) {
     const counts = block.attendance?.counts || { yes: 0, no: 0, pending: block.invitedMemberIds?.length || 0 };
+    const laserMeta = block.type === 'LASER' && block.interventionSessionNumber
+      ? ` · zabieg ${block.interventionSessionNumber}/${block.interventionSessionTotal || 10}` : '';
+    const participantMeta = block.type === 'LASER' && block.participantIds?.length
+      ? `<small>Kody uczestników: ${esc(block.participantIds.join(', '))}</small>` : '';
     return `<article class="lead-day-card${block.status === 'Cancelled' ? ' is-cancelled' : ''}">
       <div class="lead-day-date"><strong>${esc(formatDate(block.date).slice(0, 5))}</strong><span>${esc(new Intl.DateTimeFormat('pl-PL', { weekday: 'long' }).format(new Date(`${block.date}T12:00:00`)))}</span></div>
-      <div class="lead-day-copy"><strong>${esc(typeLabel(block.type))} · ${esc(block.startTime)}–${esc(block.endTime)}</strong><p>${esc(block.location)}</p><small>Prowadzi: ${esc(block.clinicalLeadName || personName(block.clinicalLeadId))} · zaproszono ${block.invitedMemberIds.length} osób</small>
+      <div class="lead-day-copy"><strong>${esc(typeLabel(block.type))}${esc(laserMeta)} · ${esc(block.startTime)}–${esc(block.endTime)}</strong><p>${esc(block.location)}</p><small>Prowadzi: ${esc(block.clinicalLeadName || personName(block.clinicalLeadId))} · zaproszono ${block.invitedMemberIds.length} osób</small>${participantMeta}
         <div class="lead-day-counts"><span class="yes">${counts.yes} TAK</span><span class="no">${counts.no} NIE</span><span class="pending">${counts.pending} bez odpowiedzi</span></div>
       </div>
       <button class="lead-open-day" type="button" data-open-day="${esc(block.id)}">Otwórz termin</button>
@@ -95,7 +102,7 @@
   }
 
   async function loadData(options = {}) {
-    if (!accessToken) {
+    if (!accessToken && !isCoordinatorPreview) {
       showError('Otwórz indywidualny link otrzymany w wiadomości e-mail.');
       return false;
     }
@@ -104,11 +111,21 @@
       errorPanel.hidden = true;
     }
     try {
-      snapshot = await store.getDelegateData(accessToken);
-      document.getElementById('leadGreeting').textContent = `Dzień dobry, ${snapshot.user.name.split(' ')[0]}`;
-      document.getElementById('leadScope').textContent = `Twój zakres: ${snapshot.user.scopeLabel}. Widzisz tylko terminy i działania potrzebne do ich organizacji.`;
+      snapshot = isCoordinatorPreview
+        ? await store.getCoordinatorDelegateData(previewMemberId)
+        : await store.getDelegateData(accessToken);
+      document.getElementById('leadGreeting').textContent = isCoordinatorPreview ? `Podgląd: ${snapshot.user.name}` : `Dzień dobry, ${snapshot.user.name.split(' ')[0]}`;
+      document.getElementById('leadScope').textContent = `${isCoordinatorPreview ? 'Zakres tej osoby' : 'Twój zakres'}: ${snapshot.user.scopeLabel}. ${isCoordinatorPreview ? 'To bezpieczny widok tylko do odczytu.' : 'Widzisz tylko terminy i działania potrzebne do ich organizacji.'}`;
       document.getElementById('leadAddDay').textContent = `Dodaj termin: ${typeLabel(snapshot.user.allowedTypes[0])}`;
+      document.getElementById('leadAddDay').hidden = isCoordinatorPreview;
       document.getElementById('leadLogout').hidden = false;
+      document.getElementById('leadLogout').textContent = isCoordinatorPreview ? '← Wróć do Centrum kontroli' : 'Wyloguj z tego urządzenia';
+      if (isCoordinatorPreview && !document.querySelector('.lead-preview-note')) {
+        const note = document.createElement('p');
+        note.className = 'lead-preview-note';
+        note.textContent = 'Podgląd koordynatora — widzisz te same terminy i odpowiedzi, ale niczego tutaj nie zmienisz ani nie wyślesz.';
+        document.querySelector('.lead-intro').after(note);
+      }
       renderLists();
       loading.hidden = true;
       errorPanel.hidden = true;
@@ -167,18 +184,65 @@
     editor.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
+  function participantCodes() {
+    return [...new Set(document.getElementById('leadLaserParticipants').value
+      .split(/[\s,;]+/)
+      .map(value => value.trim().toUpperCase())
+      .filter(Boolean))];
+  }
+
+  function laserDates(startDate, total = 10) {
+    if (!startDate) return [];
+    const date = new Date(`${startDate}T12:00:00Z`);
+    if (Number.isNaN(date.getTime()) || date.getUTCDay() === 0) return [];
+    const dates = [];
+    while (dates.length < total) {
+      if (date.getUTCDay() !== 0) dates.push(date.toISOString().slice(0, 10));
+      date.setUTCDate(date.getUTCDate() + 1);
+    }
+    return dates;
+  }
+
+  function renderLaserDates() {
+    const target = document.getElementById('leadLaserDates');
+    if (!laserSeriesMode) {
+      target.innerHTML = '';
+      return;
+    }
+    const dates = laserDates(document.getElementById('leadDayDate').value);
+    target.innerHTML = dates.length
+      ? dates.map((date, index) => `<span>${index + 1}. ${esc(formatDate(date))}</span>`).join('')
+      : '<span>Wybierz pierwszy dzień od poniedziałku do soboty.</span>';
+  }
+
+  function applyReadOnlyMode() {
+    const form = document.getElementById('leadDayForm');
+    if (isCoordinatorPreview) form.querySelectorAll('input, select, textarea, button').forEach(control => { control.disabled = true; });
+    document.querySelector('.lead-form-actions').hidden = isCoordinatorPreview;
+    document.getElementById('leadAfterSave').hidden = true;
+    document.getElementById('leadPrepareReminder').hidden = isCoordinatorPreview;
+  }
+
   function openEditor(block = null) {
     currentBlock = block ? clone(block) : null;
     lastChangeCategory = block ? 'research-day-updated' : 'research-day-created';
     document.getElementById('leadAfterSave').hidden = true;
-    document.getElementById('leadEditorEyebrow').textContent = block ? 'Edycja terminu' : 'Nowy termin';
-    document.getElementById('leadEditorTitle').textContent = block ? `${formatDate(block.date, true)} · ${typeLabel(block.type)}` : `Dodaj ${typeLabel(snapshot.user.allowedTypes[0])}`;
+    laserSeriesMode = !block && snapshot.user.allowedTypes[0] === 'LASER';
+    document.getElementById('leadEditorEyebrow').textContent = isCoordinatorPreview ? 'Podgląd terminu' : block ? 'Edycja terminu' : laserSeriesMode ? 'Nowa seria' : 'Nowy termin';
+    document.getElementById('leadEditorTitle').textContent = block ? `${formatDate(block.date, true)} · ${typeLabel(block.type)}` : laserSeriesMode ? 'Dodaj serię 10 zabiegów' : `Dodaj ${typeLabel(snapshot.user.allowedTypes[0])}`;
     document.getElementById('leadDayTypeLabel').value = typeLabel(block?.type || snapshot.user.allowedTypes[0]);
     document.getElementById('leadDayDate').value = block?.date || '';
     document.getElementById('leadDayStart').value = block?.startTime || '09:00';
     document.getElementById('leadDayEnd').value = block?.endTime || '13:00';
     document.getElementById('leadDayLocation').value = block?.location || snapshot.blocks[0]?.location || '';
     document.getElementById('leadDayNotes').value = block?.notes || '';
+    const isLaser = (block?.type || snapshot.user.allowedTypes[0]) === 'LASER';
+    document.getElementById('leadLaserSeries').hidden = !isLaser;
+    document.getElementById('leadLaserParticipants').value = (block?.participantIds || []).join(', ');
+    document.querySelector('#leadLaserSeries h3').textContent = laserSeriesMode ? '10 zabiegów, automatycznie bez niedziel' : 'Uczestnicy tego zabiegu';
+    document.getElementById('leadDateLabel').textContent = laserSeriesMode ? 'Pierwszy zabieg' : 'Data';
+    document.getElementById('leadDateHint').textContent = isLaser ? 'poniedziałek–sobota, bez niedziel' : 'czwartek lub piątek';
+    renderLaserDates();
     const leadSelect = document.getElementById('leadDayClinicalLead');
     leadSelect.innerHTML = snapshot.team.map(person => `<option value="${esc(person.id)}">${esc(person.name)}</option>`).join('');
     leadSelect.value = block?.clinicalLeadId || snapshot.user.id;
@@ -189,6 +253,7 @@
     cancelButton.classList.toggle('restore-button', block?.status === 'Cancelled');
     document.getElementById('leadDaySave').disabled = block?.status === 'Cancelled';
     renderAttendance(block);
+    applyReadOnlyMode();
     showEditor();
   }
 
@@ -210,6 +275,7 @@
       location: document.getElementById('leadDayLocation').value.trim(),
       clinicalLeadId: document.getElementById('leadDayClinicalLead').value,
       invitedMemberIds: selectedInviteIds(),
+      participantIds: (currentBlock?.type || snapshot.user.allowedTypes[0]) === 'LASER' ? participantCodes() : [],
       notes: document.getElementById('leadDayNotes').value.trim(),
       status
     };
@@ -237,6 +303,40 @@
       return false;
     } finally {
       saveButton.disabled = currentBlock?.status === 'Cancelled';
+    }
+  }
+
+  async function persistLaserSeries() {
+    const saveButton = document.getElementById('leadDaySave');
+    const codes = participantCodes();
+    if (!codes.length) {
+      setMessage('Wpisz co najmniej jeden pseudonimizowany kod uczestnika.', true);
+      return false;
+    }
+    saveButton.disabled = true;
+    setMessage('Zapisywanie 10 terminów laser/sham…');
+    try {
+      const result = await store.saveDelegateSeries(accessToken, {
+        id: `laser-series-${Date.now()}`,
+        startDate: document.getElementById('leadDayDate').value,
+        startTime: document.getElementById('leadDayStart').value,
+        endTime: document.getElementById('leadDayEnd').value,
+        location: document.getElementById('leadDayLocation').value.trim(),
+        clinicalLeadId: document.getElementById('leadDayClinicalLead').value,
+        invitedMemberIds: selectedInviteIds(),
+        participantIds: codes,
+        notes: document.getElementById('leadDayNotes').value.trim()
+      }, snapshot.revision);
+      await loadData({ quiet: true });
+      closeEditor();
+      setMessage(`Zapisano pełną serię: ${result.blockIds.length} zabiegów. Nic nie zostało jeszcze wysłane.`);
+      return true;
+    } catch (saveError) {
+      setMessage(saveError.message || 'Nie udało się zapisać serii.', true);
+      if (saveError.code === 'revision_conflict') await loadData({ quiet: true });
+      return false;
+    } finally {
+      saveButton.disabled = false;
     }
   }
 
@@ -290,6 +390,10 @@
   }
 
   document.getElementById('leadLogout').addEventListener('click', () => {
+    if (isCoordinatorPreview) {
+      location.href = 'portal-coordinator.html?v=20260813-4';
+      return;
+    }
     localStorage.removeItem(TOKEN_KEY);
     accessToken = '';
     location.reload();
@@ -313,6 +417,7 @@
   });
   document.getElementById('leadEditorClose').addEventListener('click', closeEditor);
   document.getElementById('leadDayClinicalLead').addEventListener('change', () => renderInvitees(selectedInviteIds()));
+  document.getElementById('leadDayDate').addEventListener('change', renderLaserDates);
   document.getElementById('leadInvitees').addEventListener('change', updateInviteSummary);
   document.getElementById('leadInviteAll').addEventListener('click', () => {
     document.querySelectorAll('#leadInvitees input:not(:disabled)').forEach(input => { input.checked = true; });
@@ -324,7 +429,12 @@
   });
   document.getElementById('leadDayForm').addEventListener('submit', async event => {
     event.preventDefault();
+    if (isCoordinatorPreview) return;
     if (!event.target.reportValidity()) return;
+    if (laserSeriesMode) {
+      await persistLaserSeries();
+      return;
+    }
     const block = blockFromForm();
     const category = currentBlock ? 'research-day-updated' : 'research-day-created';
     await persistBlock(block, category);
@@ -342,6 +452,14 @@
   document.getElementById('leadAttendanceRefresh').addEventListener('click', async () => {
     if (!currentBlock) return;
     try {
+      if (isCoordinatorPreview) {
+        const currentId = currentBlock.id;
+        await loadData({ quiet: true });
+        currentBlock = snapshot.blocks.find(block => block.id === currentId) || currentBlock;
+        renderAttendance(currentBlock);
+        setMessage('Lista obecności została odświeżona.');
+        return;
+      }
       const attendance = await store.getDelegateAttendance(accessToken, currentBlock.id);
       currentBlock.attendance = { items: attendance.items, counts: attendance.counts };
       renderAttendance(currentBlock);
