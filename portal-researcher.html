@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Manrope:wght@500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="portal-simple.css?v=20260813-3" />
+  <link rel="stylesheet" href="portal-simple.css?v=20260815-1" />
 </head>
 <body>
   <header class="simple-header">
@@ -37,6 +37,16 @@
       </div>
     </header>
     <p class="sync-status" id="researcherSyncStatus" role="status" aria-live="polite"></p>
+
+    <section class="welcome-card researcher-management-card" id="researcherManagement" hidden aria-labelledby="researcherManagementTitle">
+      <div>
+        <p class="eyebrow">Dodatkowy dostęp dla prowadzących</p>
+        <h2 id="researcherManagementTitle">Twój panel zarządzania</h2>
+        <p id="researcherManagementText"></p>
+        <small>Pierwsze otwarcie na tym urządzeniu wymaga indywidualnego linku otrzymanego e-mailem. Później możesz wchodzić tutaj.</small>
+      </div>
+      <a class="primary-link" id="researcherManagementLink" href="portal-lead.html?v=20260815-1">Otwórz mój panel zarządzania</a>
+    </section>
 
     <section class="welcome-card researcher-floor-plan-card" aria-labelledby="researcherFloorPlanTitle">
       <div>
@@ -78,6 +88,6 @@
   <script src="portal-data.js?v=20260813-3"></script>
   <script src="portal-sync-config.js?v=20260813-3"></script>
   <script src="portal-store.js?v=20260813-3"></script>
-  <script src="portal-researcher.js?v=20260813-3"></script>
+  <script src="portal-researcher.js?v=20260815-1"></script>
 </body>
 </html>

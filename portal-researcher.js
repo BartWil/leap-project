@@ -4,7 +4,12 @@
   const SESSION_KEY = 'leap-portal-authenticated';
   const COORDINATOR_SESSION_KEY = 'leap-coordinator-authenticated';
   const RESEARCHER_KEY = 'leap-researcher-id';
-  const VERSION = '20260813-3';
+  const VERSION = '20260815-1';
+  const MANAGEMENT_SCOPES = {
+    alicja: 'Możesz dodawać i zmieniać wizyty W12, zapraszać zespół, sprawdzać odpowiedzi TAK/NIE i wysyłać przypomnienia.',
+    natalia: 'Możesz dodawać i zmieniać wizyty W12, zapraszać zespół, sprawdzać odpowiedzi TAK/NIE i wysyłać przypomnienia.',
+    filip: 'Możesz dodawać serie laser/sham, zapraszać zespół, sprawdzać odpowiedzi TAK/NIE i wysyłać przypomnienia.'
+  };
 
   if (sessionStorage.getItem(SESSION_KEY) !== 'true') {
     location.replace(`portal.html?v=${VERSION}`);
@@ -21,6 +26,10 @@
   const messagesList = document.getElementById('researcherMessages');
   const taskCount = document.getElementById('researcherTaskCount');
   const syncStatus = document.getElementById('researcherSyncStatus');
+  const management = document.getElementById('researcherManagement');
+  const managementTitle = document.getElementById('researcherManagementTitle');
+  const managementText = document.getElementById('researcherManagementText');
+  const managementLink = document.getElementById('researcherManagementLink');
 
   const esc = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
   const personName = id => data.team.find(person => person.id === id)?.name || 'Nieprzypisano';
@@ -99,6 +108,19 @@
     duties.innerHTML = `<p class="role-summary"><strong>${esc(person.name)}</strong><br>${esc(person.notesPublic)}</p><ul class="responsibility-list">${person.responsibilities.map(item => `<li>${esc(item)}</li>`).join('')}</ul><a class="primary-link" href="portal-duties.html?v=${VERSION}&amp;person=${encodeURIComponent(person.id)}">Zobacz dokładną instrukcję</a>`;
   }
 
+  function renderManagement(person) {
+    const scope = MANAGEMENT_SCOPES[person.id];
+    if (!scope) {
+      management.hidden = true;
+      managementLink.removeAttribute('href');
+      return;
+    }
+    managementTitle.textContent = `Panel zarządzania — ${person.name}`;
+    managementText.textContent = scope;
+    managementLink.href = `portal-lead.html?v=${VERSION}&member=${encodeURIComponent(person.id)}`;
+    management.hidden = false;
+  }
+
   function renderMessages(memberId, tasks) {
     const messages = [];
     const today = new Date().toISOString().slice(0, 10);
@@ -121,6 +143,7 @@
     if (!person) {
       welcome.hidden = false;
       workspace.hidden = true;
+      management.hidden = true;
       localStorage.removeItem(RESEARCHER_KEY);
       return;
     }
@@ -130,6 +153,7 @@
     renderDays(person.id);
     const tasks = renderTasks(person.id);
     renderDuties(person);
+    renderManagement(person);
     renderMessages(person.id, tasks);
   }
 

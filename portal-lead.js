@@ -7,30 +7,33 @@
   const esc = value => String(value ?? '').replace(/[&<>'"]/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' })[character]);
   const tokenFromUrl = new URL(location.href).searchParams.get('access') || '';
   const previewMemberId = new URL(location.href).searchParams.get('preview') || '';
+  const requestedMemberId = new URL(location.href).searchParams.get('member') || '';
   const isCoordinatorPreview = /^(alicja|natalia|filip)$/.test(previewMemberId);
+  const isPersonalEntry = /^(alicja|natalia|filip)$/.test(requestedMemberId);
+  const memberTokenKey = memberId => `${TOKEN_KEY}:${memberId}`;
+  const readStoredToken = key => {
+    let value = '';
+    try { value = localStorage.getItem(key) || ''; } catch {}
+    if (!value) try { value = sessionStorage.getItem(key) || ''; } catch {}
+    return /^[a-f0-9]{64}$/i.test(value) ? value : '';
+  };
+  const rememberToken = (key, token) => {
+    try { localStorage.setItem(key, token); return true; } catch {}
+    try { sessionStorage.setItem(key, token); return true; } catch {}
+    return false;
+  };
   let accessToken = '';
   if (/^[a-f0-9]{64}$/i.test(tokenFromUrl)) {
     accessToken = tokenFromUrl;
-    let tokenSaved = false;
-    try {
-      localStorage.setItem(TOKEN_KEY, tokenFromUrl);
-      tokenSaved = true;
-    } catch {
-      try {
-        sessionStorage.setItem(TOKEN_KEY, tokenFromUrl);
-        tokenSaved = true;
-      } catch {}
-    }
+    const tokenSaved = rememberToken(TOKEN_KEY, tokenFromUrl);
     if (tokenSaved) {
       const cleanUrl = new URL(location.href);
       cleanUrl.searchParams.delete('access');
       history.replaceState(null, '', `${cleanUrl.pathname}${cleanUrl.search}${cleanUrl.hash}`);
     }
   } else {
-    try { accessToken = localStorage.getItem(TOKEN_KEY) || ''; } catch {}
-    if (!accessToken) {
-      try { accessToken = sessionStorage.getItem(TOKEN_KEY) || ''; } catch {}
-    }
+    accessToken = isPersonalEntry ? readStoredToken(memberTokenKey(requestedMemberId)) : '';
+    if (!accessToken) accessToken = readStoredToken(TOKEN_KEY);
   }
   let snapshot = null;
   let currentBlock = null;
@@ -52,6 +55,10 @@
     if (revoke) {
       try { localStorage.removeItem(TOKEN_KEY); } catch {}
       try { sessionStorage.removeItem(TOKEN_KEY); } catch {}
+      if (isPersonalEntry) {
+        try { localStorage.removeItem(memberTokenKey(requestedMemberId)); } catch {}
+        try { sessionStorage.removeItem(memberTokenKey(requestedMemberId)); } catch {}
+      }
     }
     loading.hidden = true;
     app.hidden = true;
@@ -134,6 +141,11 @@
       snapshot = isCoordinatorPreview
         ? await store.getCoordinatorDelegateData(previewMemberId)
         : await store.getDelegateData(accessToken);
+      if (isPersonalEntry && snapshot.user.id !== requestedMemberId) {
+        showError(`Na tym urządzeniu zapisano dostęp dla: ${snapshot.user.name}. Aby otworzyć panel wybranej osoby, trzeba jeden raz użyć jej indywidualnego linku z e-maila.`);
+        return false;
+      }
+      if (!isCoordinatorPreview && accessToken) rememberToken(memberTokenKey(snapshot.user.id), accessToken);
       document.getElementById('leadGreeting').textContent = isCoordinatorPreview ? `Podgląd: ${snapshot.user.name}` : `Dzień dobry, ${snapshot.user.name.split(' ')[0]}`;
       document.getElementById('leadScope').textContent = `${isCoordinatorPreview ? 'Zakres tej osoby' : 'Twój zakres'}: ${snapshot.user.scopeLabel}. ${isCoordinatorPreview ? 'To bezpieczny widok tylko do odczytu.' : 'Widzisz tylko terminy i działania potrzebne do ich organizacji.'}`;
       document.getElementById('leadAddDay').textContent = `Dodaj termin: ${typeLabel(snapshot.user.allowedTypes[0])}`;
@@ -416,6 +428,10 @@
     }
     try { localStorage.removeItem(TOKEN_KEY); } catch {}
     try { sessionStorage.removeItem(TOKEN_KEY); } catch {}
+    if (snapshot?.user?.id) {
+      try { localStorage.removeItem(memberTokenKey(snapshot.user.id)); } catch {}
+      try { sessionStorage.removeItem(memberTokenKey(snapshot.user.id)); } catch {}
+    }
     accessToken = '';
     location.reload();
   });
