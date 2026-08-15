@@ -35,6 +35,26 @@
 .lead-day-card.is-cancelled { opacity: .65; }
 .lead-day-card.is-cancelled .lead-day-copy strong::after { content: " · odwołany"; color: #8b3028; }
 .lead-open-day { border: 1px solid var(--ink); padding: 10px 12px; background: transparent; color: var(--ink); font: 700 12px var(--body); cursor: pointer; }
+.lead-series-card { border-left: 5px solid #244d7a; }
+.lead-series-overview { display: grid; gap: 18px; }
+.lead-series-overview[hidden] { display: none; }
+.lead-series-summary { padding: 22px; border: 1px solid #b9c9da; background: #f3f7fb; }
+.lead-series-summary h3 { margin: 5px 0 9px; font: 600 24px var(--display); }
+.lead-series-summary p { margin: 4px 0; color: var(--muted); line-height: 1.5; }
+.series-matrix-wrap { overflow-x: auto; border: 1px solid var(--line); background: var(--white); }
+.series-matrix { width: 100%; min-width: 900px; border-collapse: collapse; font-size: 11px; }
+.series-matrix th, .series-matrix td { padding: 10px 8px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); text-align: center; white-space: nowrap; }
+.series-matrix th:first-child, .series-matrix td:first-child { position: sticky; left: 0; z-index: 1; min-width: 150px; background: var(--white); text-align: left; }
+.series-matrix th { background: var(--soft); font-weight: 700; }
+.series-status { display: inline-block; min-width: 42px; padding: 5px 6px; font-weight: 700; }
+.series-status.is-yes { color: #176b4d; background: #edf8f3; }
+.series-status.is-no { color: #8b3028; background: #fff0ee; }
+.series-status.is-pending { color: #80601d; background: #fff8e8; }
+.series-status.is-empty { color: var(--muted); background: var(--soft); }
+.series-actions { display: flex; justify-content: flex-end; }
+.lead-series-days { display: grid; gap: 8px; }
+.lead-series-day { display: grid; grid-template-columns: 52px 120px 1fr auto; gap: 12px; align-items: center; padding: 12px 14px; border: 1px solid var(--line); background: var(--white); }
+.lead-series-day span, .lead-series-day small { color: var(--muted); }
 .lead-empty { padding: 26px; border: 1px dashed var(--line); color: var(--muted); line-height: 1.6; }
 .lead-editor { margin-top: 8px; padding-top: 12px; }
 .lead-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; padding: clamp(20px, 4vw, 30px); border: 1px solid var(--line); background: var(--white); }
@@ -67,6 +87,9 @@
   .lead-open-day { grid-column: 1 / -1; width: 100%; }
   .lead-form { grid-template-columns: 1fr; padding: 18px; }
   .lead-form .field-wide { grid-column: auto; }
+  .series-actions .lead-primary { width: 100%; }
+  .lead-series-day { grid-template-columns: 42px 1fr auto; }
+  .lead-series-day small { grid-column: 2 / -1; }
   .lead-tabs { grid-template-columns: 1fr; }
   .lead-tabs button { border-right: 0; border-bottom: 1px solid var(--ink); }
   .lead-tabs button:last-child { border-bottom: 0; }

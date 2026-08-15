@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Manrope:wght@500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="portal-simple.css?v=20260813-4" />
-  <link rel="stylesheet" href="portal-lead.css?v=20260813-4" />
+  <link rel="stylesheet" href="portal-lead.css?v=20260815-3" />
 </head>
 <body>
   <header class="simple-header lead-header">
@@ -98,6 +98,17 @@
           </div>
         </form>
 
+        <section class="lead-series-overview" id="leadSeriesOverview" hidden>
+          <div id="leadSeriesSummary"></div>
+          <div class="series-matrix-wrap">
+            <table class="series-matrix" id="leadSeriesMatrix"></table>
+          </div>
+          <div class="series-actions">
+            <button class="lead-primary" id="leadPrepareSeriesInvitation" type="button">Przygotuj zbiorczą wiadomość / przypomnienie</button>
+          </div>
+          <div class="lead-series-days" id="leadSeriesDays"></div>
+        </section>
+
         <section class="lead-after-save" id="leadAfterSave" hidden>
           <strong id="leadAfterSaveTitle">Termin został zapisany.</strong>
           <p id="leadAfterSaveText">Nic nie zostało jeszcze wysłane. Możesz teraz przygotować wiadomość do zaproszonych osób.</p>
@@ -136,7 +147,7 @@
   </dialog>
 
   <script src="portal-sync-config.js?v=20260813-3"></script>
-  <script src="portal-store.js?v=20260815-2"></script>
-  <script src="portal-lead.js?v=20260815-2"></script>
+  <script src="portal-store.js?v=20260815-3"></script>
+  <script src="portal-lead.js?v=20260815-3"></script>
 </body>
 </html>

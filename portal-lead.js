@@ -50,6 +50,7 @@
   const app = document.getElementById('leadApp');
   const message = document.getElementById('leadMessage');
   const editor = document.getElementById('leadEditor');
+  const seriesOverview = document.getElementById('leadSeriesOverview');
   const tabs = document.querySelector('.lead-tabs');
   const views = [...document.querySelectorAll('[data-lead-panel]')];
   const mailDialog = document.getElementById('leadMailDialog');
@@ -115,6 +116,40 @@
     </article>`;
   }
 
+  function sortedSeriesBlocks(blocks) {
+    return blocks.slice().sort((a, b) => Number(a.interventionSessionNumber || 0) - Number(b.interventionSessionNumber || 0) || a.date.localeCompare(b.date));
+  }
+
+  function seriesBlocks(seriesId) {
+    return sortedSeriesBlocks(snapshot.blocks.filter(block => block.type === 'LASER' && block.interventionSeriesId === seriesId));
+  }
+
+  function seriesCard(blocks) {
+    const ordered = sortedSeriesBlocks(blocks);
+    const first = ordered[0];
+    const last = ordered[ordered.length - 1];
+    const pendingDays = ordered.filter(block => (block.attendance?.counts?.pending || 0) > 0).length;
+    const unavailableDays = ordered.filter(block => (block.attendance?.counts?.no || 0) > 0).length;
+    const codes = [...new Set(ordered.flatMap(block => block.participantIds || []))];
+    return `<article class="lead-day-card lead-series-card">
+      <div class="lead-day-date"><strong>${esc(formatDate(first.date).slice(0, 5))}</strong><span>początek serii</span></div>
+      <div class="lead-day-copy"><strong>Laser/sham · cała seria ${ordered.length} zabiegów</strong><p>${esc(formatDate(first.date))}–${esc(formatDate(last.date))} · ${esc(first.startTime)}–${esc(first.endTime)}</p><small>Kody uczestników: ${esc(codes.join(', ') || '—')}</small>
+        <div class="lead-day-counts"><span class="no">${unavailableDays} dni z NIE</span><span class="pending">${pendingDays} dni bez pełnej odpowiedzi</span></div>
+      </div>
+      <button class="lead-open-day" type="button" data-open-series="${esc(first.interventionSeriesId)}">Otwórz całą serię</button>
+    </article>`;
+  }
+
+  function groupedCards(blocks) {
+    const renderedSeries = new Set();
+    return blocks.map(block => {
+      if (block.type !== 'LASER' || !block.interventionSeriesId) return dayCard(block);
+      if (renderedSeries.has(block.interventionSeriesId)) return '';
+      renderedSeries.add(block.interventionSeriesId);
+      return seriesCard(seriesBlocks(block.interventionSeriesId));
+    }).join('');
+  }
+
   function renderLists() {
     const now = new Date();
     const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
@@ -124,10 +159,10 @@
     const future = snapshot.blocks.filter(block => block.date >= today).sort((a, b) => a.date.localeCompare(b.date) || a.startTime.localeCompare(b.startTime));
     const past = snapshot.blocks.filter(block => block.date < today).sort((a, b) => b.date.localeCompare(a.date) || b.startTime.localeCompare(a.startTime));
     document.getElementById('leadAttentionList').innerHTML = upcoming.length
-      ? upcoming.map(dayCard).join('')
+      ? groupedCards(upcoming)
       : '<div class="lead-empty">Brak najbliższych terminów. Użyj przycisku „Dodaj termin”, kiedy ustalisz nowy dzień.</div>';
     document.getElementById('leadCalendarList').innerHTML = future.length || past.length
-      ? [...future, ...past].map(dayCard).join('')
+      ? groupedCards([...future, ...past])
       : '<div class="lead-empty">W Twoim zakresie nie ma jeszcze żadnych terminów.</div>';
   }
 
@@ -222,6 +257,39 @@
     editor.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
+  function seriesStatus(block, memberId) {
+    if (!(block.invitedMemberIds || []).includes(memberId)) return 'empty';
+    return block.attendance?.items?.find(item => item.memberId === memberId)?.status || 'pending';
+  }
+
+  function renderSeriesOverview() {
+    const blocks = sortedSeriesBlocks(currentSeriesBlocks);
+    const first = blocks[0];
+    const last = blocks[blocks.length - 1];
+    const memberIds = [...new Set(blocks.flatMap(block => block.invitedMemberIds || []))];
+    const codes = [...new Set(blocks.flatMap(block => block.participantIds || []))];
+    document.getElementById('leadSeriesSummary').innerHTML = `<div class="lead-series-summary"><p class="eyebrow">Jedna seria, jeden widok</p><h3>${blocks.length} zabiegów · ${esc(formatDate(first.date))}–${esc(formatDate(last.date))}</h3><p><b>Kody uczestników:</b> ${esc(codes.join(', ') || '—')}</p><p><b>Godzina:</b> ${esc(first.startTime)}–${esc(first.endTime)} · <b>Miejsce:</b> ${esc(first.location)}</p></div>`;
+    const labels = { yes: 'TAK', no: 'NIE', pending: 'brak', empty: '—' };
+    document.getElementById('leadSeriesMatrix').innerHTML = `<thead><tr><th>Osoba</th>${blocks.map(block => `<th>${esc(block.interventionSessionNumber || '')}.<br>${esc(formatDate(block.date).slice(0, 5))}</th>`).join('')}</tr></thead><tbody>${memberIds.map(memberId => `<tr><td>${esc(personName(memberId))}</td>${blocks.map(block => { const status = seriesStatus(block, memberId); return `<td><span class="series-status is-${status}">${labels[status]}</span></td>`; }).join('')}</tr>`).join('')}</tbody>`;
+    document.getElementById('leadSeriesDays').innerHTML = blocks.map(block => `<article class="lead-series-day"><strong>${esc(block.interventionSessionNumber || '')}/10</strong><span>${esc(formatDate(block.date))}</span><small>${esc(block.startTime)}–${esc(block.endTime)} · ${esc(block.location)}</small><button class="lead-open-day" type="button" data-open-day="${esc(block.id)}">Otwórz dzień</button></article>`).join('');
+    document.getElementById('leadPrepareSeriesInvitation').hidden = isCoordinatorPreview;
+  }
+
+  function openSeries(seriesId) {
+    currentSeriesBlocks = seriesBlocks(seriesId);
+    if (!currentSeriesBlocks.length) return;
+    currentBlock = null;
+    laserSeriesMode = false;
+    document.getElementById('leadEditorEyebrow').textContent = isCoordinatorPreview ? 'Podgląd serii' : 'Zarządzanie serią';
+    document.getElementById('leadEditorTitle').textContent = 'Seria laser/sham';
+    document.getElementById('leadDayForm').hidden = true;
+    document.getElementById('leadAfterSave').hidden = true;
+    document.getElementById('leadAttendance').hidden = true;
+    seriesOverview.hidden = false;
+    renderSeriesOverview();
+    showEditor();
+  }
+
   function participantCodes() {
     return [...new Set(document.getElementById('leadLaserParticipants').value
       .split(/[\s,;]+/)
@@ -268,6 +336,7 @@
     currentSeriesBlocks = [];
     lastChangeCategory = block ? 'research-day-updated' : 'research-day-created';
     document.getElementById('leadDayForm').hidden = false;
+    seriesOverview.hidden = true;
     document.getElementById('leadAfterSave').hidden = true;
     laserSeriesMode = !block && snapshot.user.allowedTypes[0] === 'LASER';
     document.getElementById('leadEditorEyebrow').textContent = isCoordinatorPreview ? 'Podgląd terminu' : block ? 'Edycja terminu' : laserSeriesMode ? 'Nowa seria' : 'Nowy termin';
@@ -308,6 +377,7 @@
     currentBlock = null;
     currentSeriesBlocks = [];
     document.getElementById('leadDayForm').hidden = false;
+    seriesOverview.hidden = true;
   }
 
   function blockFromForm(status = currentBlock?.status || 'Planned') {
@@ -401,7 +471,8 @@
     document.getElementById('leadDayForm').hidden = true;
     document.getElementById('leadAfterSaveTitle').textContent = 'Test zakończony — nic nie zapisano.';
     document.getElementById('leadAfterSaveText').textContent = `Portal utworzyłby 10 zabiegów od ${formatDate(dates[0])} do ${formatDate(dates[9])}, z pominięciem niedziel, dla kodów: ${codes.join(', ')}.`;
-    document.getElementById('leadPrepareInvitation').hidden = true;
+    document.getElementById('leadPrepareInvitation').textContent = 'Przygotuj testowy e-mail tylko do Bartka';
+    document.getElementById('leadPrepareInvitation').hidden = false;
     document.getElementById('leadAfterSave').hidden = false;
     setMessage('To był wyłącznie podgląd. Kalendarz i e-maile pozostały bez zmian.');
   }
@@ -415,9 +486,31 @@
       clientMessageId: newMessageId('delegate-laser-series-mail'),
       seriesId: first.interventionSeriesId,
       category: 'laser-series-created',
-      recipientIds: first.invitedMemberIds.slice(),
+      recipientIds: [...new Set(blocks.flatMap(block => block.invitedMemberIds || []))],
       subject: `LEAP — podaj dostępność: seria laser/sham ${formatDate(first.date)}–${formatDate(last.date)}`,
       body: ['Dzień dobry,', '', 'Prosimy o podanie dostępności dla serii zabiegów laser/sham w projekcie LEAP.', '', schedule, '', `Miejsce: ${first.location}`, `Prowadzący/a: ${personName(first.clinicalLeadId)}`, first.notes ? `Ważna informacja: ${first.notes}` : '', '', 'Na końcu wiadomości znajdziesz jeden przycisk. Otwórz go i zaznacz TAK/NIE osobno przy każdym terminie.', '', 'Pozdrawiamy,', 'Zespół LEAP'].join('\n')
+    };
+  }
+
+  function seriesTestEmailDraft() {
+    const dates = laserDates(document.getElementById('leadDayDate').value);
+    const startTime = document.getElementById('leadDayStart').value;
+    const endTime = document.getElementById('leadDayEnd').value;
+    const locationValue = document.getElementById('leadDayLocation').value.trim();
+    const codes = participantCodes();
+    const schedule = dates.map((date, index) => `${index + 1}. ${formatDate(date)} · ${startTime}–${endTime}`).join('\n');
+    return {
+      clientMessageId: newMessageId('coordinator-laser-series-test'),
+      category: 'laser-series-test',
+      isSeriesTest: true,
+      recipientIds: ['pi'],
+      startDate: dates[0],
+      startTime,
+      endTime,
+      location: locationValue,
+      participantIds: codes,
+      subject: `TEST LEAP — seria laser/sham ${formatDate(dates[0])}–${formatDate(dates[9])}`,
+      body: ['TEST — ta wiadomość trafia wyłącznie do Bartka.', '', 'Tak wyglądałoby zaproszenie do podania dostępności dla całej serii laser/sham.', '', schedule, '', `Miejsce: ${locationValue}`, `Kody testowe: ${codes.join(', ')}`, '', 'Przycisk w wiadomości otworzy bezpieczny formularz próbny. Odpowiedzi nie zostaną zapisane.'].join('\n')
     };
   }
 
@@ -496,6 +589,11 @@
     views.forEach(view => { view.hidden = view.dataset.leadPanel !== button.dataset.leadView; });
   });
   document.addEventListener('click', event => {
+    const seriesButton = event.target.closest('[data-open-series]');
+    if (seriesButton) {
+      openSeries(seriesButton.dataset.openSeries);
+      return;
+    }
     const button = event.target.closest('[data-open-day]');
     if (!button) return;
     const block = snapshot.blocks.find(item => item.id === button.dataset.openDay);
@@ -538,7 +636,8 @@
     if (!confirm(question)) return;
     await persistBlock(blockFromForm(restoring ? 'Planned' : 'Cancelled'), restoring ? 'research-day-updated' : 'research-day-cancelled');
   });
-  document.getElementById('leadPrepareInvitation').addEventListener('click', () => openMail(currentSeriesBlocks.length ? seriesInvitationDraft() : invitationDraft(lastChangeCategory)));
+  document.getElementById('leadPrepareInvitation').addEventListener('click', () => openMail(isDemoMode ? seriesTestEmailDraft() : currentSeriesBlocks.length ? seriesInvitationDraft() : invitationDraft(lastChangeCategory)));
+  document.getElementById('leadPrepareSeriesInvitation').addEventListener('click', () => openMail(seriesInvitationDraft()));
   document.getElementById('leadAttendanceRefresh').addEventListener('click', async () => {
     if (!currentBlock) return;
     try {
@@ -569,13 +668,22 @@
     sendButton.disabled = true;
     mailStatus.textContent = 'Wysyłanie wiadomości…';
     try {
-      const send = mailDraft.seriesId ? store.sendDelegateSeriesEmail : store.sendDelegateEmail;
-      const result = await send(accessToken, {
+      const payload = {
         ...mailDraft,
         subject: document.getElementById('leadMailSubject').value.trim(),
         body: document.getElementById('leadMailBody').value.trim()
-      });
+      };
+      const result = mailDraft.isSeriesTest
+        ? await store.sendCoordinatorSeriesTestEmail(payload)
+        : mailDraft.seriesId
+          ? await store.sendDelegateSeriesEmail(accessToken, payload)
+          : await store.sendDelegateEmail(accessToken, payload);
       mailStatus.textContent = `Wysłano do ${result.sentCount} ${result.sentCount === 1 ? 'osoby' : 'osób'}.`;
+      if (mailDraft.isSeriesTest) {
+        setMessage('Wysłano test wyłącznie do Bartka. Kalendarz i odpowiedzi pozostały bez zmian.');
+        setTimeout(closeMail, 1300);
+        return;
+      }
       await loadData({ quiet: true });
       if (mailDraft.blockId) {
         currentBlock = snapshot.blocks.find(block => block.id === mailDraft.blockId) || currentBlock;

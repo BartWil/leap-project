@@ -460,6 +460,29 @@
     return result;
   }
 
+  async function sendCoordinatorSeriesTestEmail(draft) {
+    const token = coordinatorToken();
+    if (!token) throw delegateError('unauthorized');
+    const id = requestId();
+    await post({
+      action: 'coordinator-send-series-test-email',
+      requestId: id,
+      token,
+      clientMessageId: String(draft.clientMessageId || ''),
+      startDate: String(draft.startDate || ''),
+      startTime: String(draft.startTime || ''),
+      endTime: String(draft.endTime || ''),
+      location: String(draft.location || ''),
+      participantIds: Array.isArray(draft.participantIds) ? draft.participantIds : [],
+      subject: String(draft.subject || ''),
+      body: String(draft.body || ''),
+      category: String(draft.category || '')
+    });
+    const result = await waitForStatus('operation-status', id);
+    if (!result?.ok) throw delegateError(result?.error, result);
+    return result;
+  }
+
   function delegateError(code, details = {}) {
     const messages = {
       invalid_delegate_access: 'Ten link dostępu jest nieprawidłowy.',
@@ -472,6 +495,7 @@
       invalid_delegate_day: 'Sprawdź datę, godziny, miejsce, prowadzącego i zaproszony zespół.',
       invalid_email_draft: 'Sprawdź odbiorców, temat i treść wiadomości.',
       invalid_series: 'Nie znaleziono pełnej serii laser/sham. Odśwież panel i spróbuj ponownie.',
+      invalid_series_test: 'Sprawdź datę, godziny, miejsce i pseudonimizowane kody w teście serii.',
       invalid_reminder_recipients: 'Przypomnienie może trafić wyłącznie do osób bez odpowiedzi.',
       missing_contacts: 'Nie wszystkie wybrane osoby mają aktywny adres e-mail.',
       mail_quota_exceeded: 'Dzisiejszy limit wysyłki Google został wyczerpany.',
@@ -609,6 +633,7 @@
     saveDelegateSeries,
     sendDelegateEmail,
     sendDelegateSeriesEmail,
+    sendCoordinatorSeriesTestEmail,
     getDelegateAccessList,
     getControlCenterData,
     issueDelegateAccess,

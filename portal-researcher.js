@@ -4,7 +4,7 @@
   const SESSION_KEY = 'leap-portal-authenticated';
   const COORDINATOR_SESSION_KEY = 'leap-coordinator-authenticated';
   const RESEARCHER_KEY = 'leap-researcher-id';
-  const VERSION = '20260815-1';
+  const VERSION = '20260815-3';
   const MANAGEMENT_SCOPES = {
     alicja: 'Możesz dodawać i zmieniać wizyty W12, zapraszać zespół, sprawdzać odpowiedzi TAK/NIE i wysyłać przypomnienia.',
     natalia: 'Możesz dodawać i zmieniać wizyty W12, zapraszać zespół, sprawdzać odpowiedzi TAK/NIE i wysyłać przypomnienia.',
