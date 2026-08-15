@@ -442,6 +442,24 @@
     return result;
   }
 
+  async function sendDelegateSeriesEmail(token, draft) {
+    const id = requestId();
+    await post({
+      action: 'delegate-send-series-email',
+      requestId: id,
+      token: String(token || ''),
+      clientMessageId: String(draft.clientMessageId || ''),
+      seriesId: String(draft.seriesId || ''),
+      recipientIds: Array.isArray(draft.recipientIds) ? draft.recipientIds : [],
+      subject: String(draft.subject || ''),
+      body: String(draft.body || ''),
+      category: String(draft.category || '')
+    });
+    const result = await waitForStatus('operation-status', id);
+    if (!result?.ok) throw delegateError(result?.error, result);
+    return result;
+  }
+
   function delegateError(code, details = {}) {
     const messages = {
       invalid_delegate_access: 'Ten link dostępu jest nieprawidłowy.',
@@ -453,6 +471,7 @@
       duplicate_series: 'Ta seria została już zapisana. Odśwież panel.',
       invalid_delegate_day: 'Sprawdź datę, godziny, miejsce, prowadzącego i zaproszony zespół.',
       invalid_email_draft: 'Sprawdź odbiorców, temat i treść wiadomości.',
+      invalid_series: 'Nie znaleziono pełnej serii laser/sham. Odśwież panel i spróbuj ponownie.',
       invalid_reminder_recipients: 'Przypomnienie może trafić wyłącznie do osób bez odpowiedzi.',
       missing_contacts: 'Nie wszystkie wybrane osoby mają aktywny adres e-mail.',
       mail_quota_exceeded: 'Dzisiejszy limit wysyłki Google został wyczerpany.',
@@ -589,6 +608,7 @@
     saveDelegateDay,
     saveDelegateSeries,
     sendDelegateEmail,
+    sendDelegateSeriesEmail,
     getDelegateAccessList,
     getControlCenterData,
     issueDelegateAccess,

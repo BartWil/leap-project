@@ -8,7 +8,9 @@
   const tokenFromUrl = new URL(location.href).searchParams.get('access') || '';
   const previewMemberId = new URL(location.href).searchParams.get('preview') || '';
   const requestedMemberId = new URL(location.href).searchParams.get('member') || '';
+  const demoRequested = new URL(location.href).searchParams.get('demo') === 'laser';
   const isCoordinatorPreview = /^(alicja|natalia|filip)$/.test(previewMemberId);
+  const isDemoMode = isCoordinatorPreview && previewMemberId === 'filip' && demoRequested;
   const isPersonalEntry = /^(alicja|natalia|filip)$/.test(requestedMemberId);
   const memberTokenKey = memberId => `${TOKEN_KEY}:${memberId}`;
   const readStoredToken = key => {
@@ -40,6 +42,7 @@
   let lastChangeCategory = 'research-day-created';
   let mailDraft = null;
   let laserSeriesMode = false;
+  let currentSeriesBlocks = [];
 
   const loading = document.getElementById('leadLoading');
   const errorPanel = document.getElementById('leadError');
@@ -149,13 +152,15 @@
       document.getElementById('leadGreeting').textContent = isCoordinatorPreview ? `Podgląd: ${snapshot.user.name}` : `Dzień dobry, ${snapshot.user.name.split(' ')[0]}`;
       document.getElementById('leadScope').textContent = `${isCoordinatorPreview ? 'Zakres tej osoby' : 'Twój zakres'}: ${snapshot.user.scopeLabel}. ${isCoordinatorPreview ? 'To bezpieczny widok tylko do odczytu.' : 'Widzisz tylko terminy i działania potrzebne do ich organizacji.'}`;
       document.getElementById('leadAddDay').textContent = `Dodaj termin: ${typeLabel(snapshot.user.allowedTypes[0])}`;
-      document.getElementById('leadAddDay').hidden = isCoordinatorPreview;
+      document.getElementById('leadAddDay').hidden = isCoordinatorPreview && !isDemoMode;
       document.getElementById('leadLogout').hidden = false;
       document.getElementById('leadLogout').textContent = isCoordinatorPreview ? '← Wróć do Centrum kontroli' : 'Wyloguj z tego urządzenia';
       if (isCoordinatorPreview && !document.querySelector('.lead-preview-note')) {
         const note = document.createElement('p');
         note.className = 'lead-preview-note';
-        note.textContent = 'Podgląd koordynatora — widzisz te same terminy i odpowiedzi, ale niczego tutaj nie zmienisz ani nie wyślesz.';
+        note.textContent = isDemoMode
+          ? 'Tryb próbny koordynatora — możesz przejść przez tworzenie serii laser/sham. Nic nie zostanie zapisane ani wysłane.'
+          : 'Podgląd koordynatora — widzisz te same terminy i odpowiedzi, ale niczego tutaj nie zmienisz ani nie wyślesz.';
         document.querySelector('.lead-intro').after(note);
       }
       renderLists();
@@ -184,9 +189,10 @@
   function renderInvitees(selectedIds = []) {
     const leadId = document.getElementById('leadDayClinicalLead').value;
     const selected = new Set(selectedIds);
+    const isLaser = (currentBlock?.type || snapshot.user.allowedTypes[0]) === 'LASER';
     document.getElementById('leadInvitees').innerHTML = snapshot.team.map(person => {
       const isLead = person.id === leadId;
-      return `<label class="invite-option${isLead ? ' is-lead' : ''}"><input type="checkbox" value="${esc(person.id)}" ${isLead || selected.has(person.id) ? 'checked' : ''} ${isLead ? 'disabled' : ''} /><span>${esc(person.name)}${isLead ? '<small>prowadzi — dodano automatycznie</small>' : ''}</span></label>`;
+      return `<label class="invite-option${isLead ? ' is-lead' : ''}"><input type="checkbox" value="${esc(person.id)}" ${isLead || selected.has(person.id) ? 'checked' : ''} ${isLead ? 'disabled' : ''} /><span>${esc(person.name)}${isLead ? `<small>${isLaser ? 'odpowiada za serię' : 'prowadzi'} — dodano automatycznie</small>` : ''}</span></label>`;
     }).join('');
     updateInviteSummary();
   }
@@ -249,15 +255,19 @@
 
   function applyReadOnlyMode() {
     const form = document.getElementById('leadDayForm');
-    if (isCoordinatorPreview) form.querySelectorAll('input, select, textarea, button').forEach(control => { control.disabled = true; });
-    document.querySelector('.lead-form-actions').hidden = isCoordinatorPreview;
+    const interactiveDemo = isDemoMode && laserSeriesMode && !currentBlock;
+    form.querySelectorAll('input, select, textarea, button').forEach(control => { control.disabled = isCoordinatorPreview && !interactiveDemo; });
+    document.querySelector('.lead-form-actions').hidden = isCoordinatorPreview && !interactiveDemo;
+    document.getElementById('leadDaySave').textContent = interactiveDemo ? 'Sprawdź serię bez zapisywania' : laserSeriesMode ? 'Zapisz serię 10 zabiegów' : 'Zapisz termin';
     document.getElementById('leadAfterSave').hidden = true;
     document.getElementById('leadPrepareReminder').hidden = isCoordinatorPreview;
   }
 
   function openEditor(block = null) {
     currentBlock = block ? clone(block) : null;
+    currentSeriesBlocks = [];
     lastChangeCategory = block ? 'research-day-updated' : 'research-day-created';
+    document.getElementById('leadDayForm').hidden = false;
     document.getElementById('leadAfterSave').hidden = true;
     laserSeriesMode = !block && snapshot.user.allowedTypes[0] === 'LASER';
     document.getElementById('leadEditorEyebrow').textContent = isCoordinatorPreview ? 'Podgląd terminu' : block ? 'Edycja terminu' : laserSeriesMode ? 'Nowa seria' : 'Nowy termin';
@@ -269,6 +279,7 @@
     document.getElementById('leadDayLocation').value = block?.location || snapshot.blocks[0]?.location || '';
     document.getElementById('leadDayNotes').value = block?.notes || '';
     const isLaser = (block?.type || snapshot.user.allowedTypes[0]) === 'LASER';
+    document.getElementById('leadClinicalLeadLabel').textContent = isLaser ? 'Osoba odpowiedzialna za serię zabiegów' : 'Osoba prowadząca część kliniczną';
     document.getElementById('leadLaserSeries').hidden = !isLaser;
     document.getElementById('leadLaserParticipants').value = (block?.participantIds || []).join(', ');
     document.querySelector('#leadLaserSeries h3').textContent = laserSeriesMode ? '10 zabiegów, automatycznie bez niedziel' : 'Uczestnicy tego zabiegu';
@@ -295,6 +306,8 @@
     const active = tabs.querySelector('.active')?.dataset.leadView || 'attention';
     views.forEach(view => { view.hidden = view.dataset.leadPanel !== active; });
     currentBlock = null;
+    currentSeriesBlocks = [];
+    document.getElementById('leadDayForm').hidden = false;
   }
 
   function blockFromForm(status = currentBlock?.status || 'Planned') {
@@ -360,8 +373,14 @@
         notes: document.getElementById('leadDayNotes').value.trim()
       }, snapshot.revision);
       await loadData({ quiet: true });
-      closeEditor();
-      setMessage(`Zapisano pełną serię: ${result.blockIds.length} zabiegów. Nic nie zostało jeszcze wysłane.`);
+      currentSeriesBlocks = result.blockIds.map(id => snapshot.blocks.find(block => block.id === id)).filter(Boolean);
+      document.getElementById('leadDayForm').hidden = true;
+      document.getElementById('leadAfterSaveTitle').textContent = `Zapisano pełną serię: ${currentSeriesBlocks.length} zabiegów.`;
+      document.getElementById('leadAfterSaveText').textContent = 'Nic nie zostało jeszcze wysłane. Przygotuj jedną wiadomość, aby każda osoba podała dostępność dla wszystkich swoich terminów.';
+      document.getElementById('leadPrepareInvitation').textContent = 'Przygotuj jedną wiadomość o całej serii';
+      document.getElementById('leadPrepareInvitation').hidden = false;
+      document.getElementById('leadAfterSave').hidden = false;
+      setMessage('Seria zapisana. Sprawdź podsumowanie przed wysłaniem wiadomości.');
       return true;
     } catch (saveError) {
       setMessage(saveError.message || 'Nie udało się zapisać serii.', true);
@@ -370,6 +389,36 @@
     } finally {
       saveButton.disabled = false;
     }
+  }
+
+  function previewLaserSeriesWithoutSaving() {
+    const codes = participantCodes();
+    const dates = laserDates(document.getElementById('leadDayDate').value);
+    if (!codes.length || dates.length !== 10) {
+      setMessage('Wpisz kod uczestnika i wybierz pierwszy dzień od poniedziałku do soboty.', true);
+      return;
+    }
+    document.getElementById('leadDayForm').hidden = true;
+    document.getElementById('leadAfterSaveTitle').textContent = 'Test zakończony — nic nie zapisano.';
+    document.getElementById('leadAfterSaveText').textContent = `Portal utworzyłby 10 zabiegów od ${formatDate(dates[0])} do ${formatDate(dates[9])}, z pominięciem niedziel, dla kodów: ${codes.join(', ')}.`;
+    document.getElementById('leadPrepareInvitation').hidden = true;
+    document.getElementById('leadAfterSave').hidden = false;
+    setMessage('To był wyłącznie podgląd. Kalendarz i e-maile pozostały bez zmian.');
+  }
+
+  function seriesInvitationDraft() {
+    const blocks = currentSeriesBlocks.slice().sort((a, b) => a.date.localeCompare(b.date));
+    const first = blocks[0];
+    const last = blocks[blocks.length - 1];
+    const schedule = blocks.map(block => `${block.interventionSessionNumber || ''}. ${formatDate(block.date)} · ${block.startTime}–${block.endTime}`).join('\n');
+    return {
+      clientMessageId: newMessageId('delegate-laser-series-mail'),
+      seriesId: first.interventionSeriesId,
+      category: 'laser-series-created',
+      recipientIds: first.invitedMemberIds.slice(),
+      subject: `LEAP — podaj dostępność: seria laser/sham ${formatDate(first.date)}–${formatDate(last.date)}`,
+      body: ['Dzień dobry,', '', 'Prosimy o podanie dostępności dla serii zabiegów laser/sham w projekcie LEAP.', '', schedule, '', `Miejsce: ${first.location}`, `Prowadzący/a: ${personName(first.clinicalLeadId)}`, first.notes ? `Ważna informacja: ${first.notes}` : '', '', 'Na końcu wiadomości znajdziesz jeden przycisk. Otwórz go i zaznacz TAK/NIE osobno przy każdym terminie.', '', 'Pozdrawiamy,', 'Zespół LEAP'].join('\n')
+    };
   }
 
   function invitationDraft(category) {
@@ -466,8 +515,12 @@
   });
   document.getElementById('leadDayForm').addEventListener('submit', async event => {
     event.preventDefault();
-    if (isCoordinatorPreview) return;
+    if (isCoordinatorPreview && !isDemoMode) return;
     if (!event.target.reportValidity()) return;
+    if (isDemoMode) {
+      previewLaserSeriesWithoutSaving();
+      return;
+    }
     if (laserSeriesMode) {
       await persistLaserSeries();
       return;
@@ -485,7 +538,7 @@
     if (!confirm(question)) return;
     await persistBlock(blockFromForm(restoring ? 'Planned' : 'Cancelled'), restoring ? 'research-day-updated' : 'research-day-cancelled');
   });
-  document.getElementById('leadPrepareInvitation').addEventListener('click', () => openMail(invitationDraft(lastChangeCategory)));
+  document.getElementById('leadPrepareInvitation').addEventListener('click', () => openMail(currentSeriesBlocks.length ? seriesInvitationDraft() : invitationDraft(lastChangeCategory)));
   document.getElementById('leadAttendanceRefresh').addEventListener('click', async () => {
     if (!currentBlock) return;
     try {
@@ -516,15 +569,18 @@
     sendButton.disabled = true;
     mailStatus.textContent = 'Wysyłanie wiadomości…';
     try {
-      const result = await store.sendDelegateEmail(accessToken, {
+      const send = mailDraft.seriesId ? store.sendDelegateSeriesEmail : store.sendDelegateEmail;
+      const result = await send(accessToken, {
         ...mailDraft,
         subject: document.getElementById('leadMailSubject').value.trim(),
         body: document.getElementById('leadMailBody').value.trim()
       });
       mailStatus.textContent = `Wysłano do ${result.sentCount} ${result.sentCount === 1 ? 'osoby' : 'osób'}.`;
       await loadData({ quiet: true });
-      currentBlock = snapshot.blocks.find(block => block.id === mailDraft.blockId) || currentBlock;
-      renderAttendance(currentBlock);
+      if (mailDraft.blockId) {
+        currentBlock = snapshot.blocks.find(block => block.id === mailDraft.blockId) || currentBlock;
+        renderAttendance(currentBlock);
+      }
       setTimeout(closeMail, 1100);
     } catch (mailError) {
       mailStatus.textContent = mailError.message || 'Nie udało się wysłać wiadomości.';

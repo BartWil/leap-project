@@ -73,7 +73,7 @@
           <label>Godzina rozpoczęcia<input id="leadDayStart" type="time" required /></label>
           <label>Godzina zakończenia<input id="leadDayEnd" type="time" required /></label>
           <label class="field-wide">Miejsce<input id="leadDayLocation" type="text" maxlength="200" required /></label>
-          <label class="field-wide">Osoba prowadząca część kliniczną<select id="leadDayClinicalLead" required></select></label>
+          <label class="field-wide"><span id="leadClinicalLeadLabel">Osoba prowadząca część kliniczną</span><select id="leadDayClinicalLead" required></select></label>
           <fieldset class="field-wide invite-field">
             <legend>Osoby zaproszone na ten dzień</legend>
             <p class="invite-help">Prowadzący jest dodawany automatycznie. Zaznacz pozostałe osoby potrzebne tego dnia.</p>
@@ -99,8 +99,8 @@
         </form>
 
         <section class="lead-after-save" id="leadAfterSave" hidden>
-          <strong>Termin został zapisany.</strong>
-          <p>Nic nie zostało jeszcze wysłane. Możesz teraz przygotować wiadomość do zaproszonych osób.</p>
+          <strong id="leadAfterSaveTitle">Termin został zapisany.</strong>
+          <p id="leadAfterSaveText">Nic nie zostało jeszcze wysłane. Możesz teraz przygotować wiadomość do zaproszonych osób.</p>
           <button class="lead-primary" id="leadPrepareInvitation" type="button">Przygotuj wiadomość</button>
         </section>
 
@@ -136,7 +136,7 @@
   </dialog>
 
   <script src="portal-sync-config.js?v=20260813-3"></script>
-  <script src="portal-store.js?v=20260813-4"></script>
-  <script src="portal-lead.js?v=20260815-1"></script>
+  <script src="portal-store.js?v=20260815-2"></script>
+  <script src="portal-lead.js?v=20260815-2"></script>
 </body>
 </html>
