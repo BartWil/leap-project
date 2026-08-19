@@ -166,18 +166,26 @@
 
   async function post(request) {
     if (!isConfigured()) throw new Error('Synchronizacja nie została jeszcze podłączona.');
-    await fetch(endpoint(), {
+    const transport = fetch(endpoint(), {
       method: 'POST',
       mode: 'no-cors',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify(request)
     });
+    const acknowledgement = await Promise.race([
+      transport.then(() => ({ completed: true, error: null }), error => ({ completed: true, error })),
+      new Promise(resolve => setTimeout(() => resolve({ completed: false, error: null }), 2500))
+    ]);
+    if (acknowledgement.error) {
+      throw new Error('Nie udało się wysłać żądania do Google. Sprawdź połączenie i spróbuj ponownie.');
+    }
+    if (!acknowledgement.completed) transport.catch(() => {});
   }
 
   const wait = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds));
 
   async function waitForStatus(action, id) {
-    const timeoutAt = Date.now() + Number(syncConfig().requestTimeoutMs || 15000);
+    const timeoutAt = Date.now() + Number(syncConfig().operationTimeoutMs || 90000);
     while (Date.now() < timeoutAt) {
       const result = await jsonp(action, { requestId: id });
       if (!result?.pending) return result;
