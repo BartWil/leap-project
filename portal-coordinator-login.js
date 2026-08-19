@@ -35,8 +35,14 @@
     status.textContent = 'Łączenie z Google… przy wolniejszej odpowiedzi może to potrwać około minuty.';
     try {
       await window.LEAP_PORTAL_STORE.authenticateCoordinator(password.value);
-      submit.textContent = 'Łączenie danych…';
-      await window.LEAP_PORTAL_STORE.initializeSharedState();
+      submit.textContent = 'Przygotowywanie panelu…';
+      try {
+        await window.LEAP_PORTAL_STORE.getControlCenterData();
+      } catch (panelError) {
+        if (panelError?.code !== 'state_not_initialized') throw panelError;
+        await window.LEAP_PORTAL_STORE.initializeSharedState();
+        await window.LEAP_PORTAL_STORE.getControlCenterData();
+      }
       sessionStorage.setItem(COORDINATOR_SESSION_KEY, 'true');
       location.replace(`portal-coordinator.html?v=${VERSION}`);
     } catch (error) {

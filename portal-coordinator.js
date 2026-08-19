@@ -23,7 +23,8 @@
   let activityFilter = 'changes';
 
   try {
-    [data, control] = await Promise.all([store.load({ force: true }), store.getControlCenterData()]);
+    control = await store.getControlCenterData({ preferCache: true });
+    data = control.data;
   } catch (error) {
     syncStatus.textContent = error.message || 'Nie udało się pobrać Centrum kontroli.';
     syncStatus.classList.add('sync-warning');
@@ -152,7 +153,10 @@
     document.querySelectorAll('[data-activity-filter]').forEach(item => item.classList.toggle('active', item === button));
     renderActivity();
   });
-  document.getElementById('coordinatorRefresh').addEventListener('click', () => location.reload());
+  document.getElementById('coordinatorRefresh').addEventListener('click', () => {
+    store.clearControlCenterCache();
+    location.reload();
+  });
   document.getElementById('coordinatorLock').addEventListener('click', () => {
     sessionStorage.removeItem(COORDINATOR_SESSION_KEY);
     store.clearCoordinatorToken();

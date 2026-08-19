@@ -4,6 +4,8 @@
   const CACHE_KEY = 'leap-portal-shared-cache-v2';
   const LEGACY_KEY = 'leap-portal-coordinator-changes-v1';
   const COORDINATOR_TOKEN_KEY = 'leap-coordinator-sync-token';
+  const CONTROL_CENTER_CACHE_KEY = 'leap-control-center-cache-v1';
+  const CONTROL_CENTER_CACHE_TTL_MS = 120000;
   const base = window.LEAP_DEMO_DATA;
   const clone = value => JSON.parse(JSON.stringify(value));
   let currentState = null;
@@ -103,6 +105,33 @@
       cachedAt: new Date().toISOString(),
       state
     }));
+  }
+
+  function readControlCenterCache() {
+    try {
+      const cached = JSON.parse(sessionStorage.getItem(CONTROL_CENTER_CACHE_KEY));
+      const token = coordinatorToken();
+      if (!cached?.bundle?.ok || !token || cached.tokenSuffix !== token.slice(-12)) return null;
+      if (Date.now() - Number(cached.cachedAt || 0) > CONTROL_CENTER_CACHE_TTL_MS) return null;
+      if (cached.bundle.state?.initialized) rememberState(cached.bundle.state, 'Google Drive · przygotowane podczas logowania');
+      return clone(cached.bundle);
+    } catch {
+      return null;
+    }
+  }
+
+  function rememberControlCenterData(bundle) {
+    try {
+      sessionStorage.setItem(CONTROL_CENTER_CACHE_KEY, JSON.stringify({
+        cachedAt: Date.now(),
+        tokenSuffix: coordinatorToken().slice(-12),
+        bundle
+      }));
+    } catch {}
+  }
+
+  function clearControlCenterCache() {
+    try { sessionStorage.removeItem(CONTROL_CENTER_CACHE_KEY); } catch {}
   }
 
   function requestId() {
@@ -254,6 +283,7 @@
       error.code = result?.error || 'authentication_failed';
       throw error;
     }
+    clearControlCenterCache();
     sessionStorage.setItem(COORDINATOR_TOKEN_KEY, result.token);
     return result;
   }
@@ -268,6 +298,7 @@
 
   function clearCoordinatorToken() {
     sessionStorage.removeItem(COORDINATOR_TOKEN_KEY);
+    clearControlCenterCache();
   }
 
   async function save(data) {
@@ -316,6 +347,7 @@
       payload
     };
     rememberState(confirmed);
+    clearControlCenterCache();
     window.dispatchEvent(new CustomEvent('leap-data-updated', { detail: confirmed.updatedAt }));
     return clone(confirmed);
   }
@@ -359,6 +391,7 @@
       error.missingRecipientIds = Array.isArray(result?.missingRecipientIds) ? result.missingRecipientIds : [];
       throw error;
     }
+    clearControlCenterCache();
     return result;
   }
 
@@ -415,6 +448,7 @@
     });
     const result = await waitForStatus('operation-status', id);
     if (!result?.ok) throw delegateError(result?.error);
+    clearControlCenterCache();
     return result;
   }
 
@@ -429,6 +463,7 @@
     });
     const result = await waitForStatus('operation-status', id);
     if (!result?.ok) throw delegateError(result?.error);
+    clearControlCenterCache();
     return result;
   }
 
@@ -447,6 +482,7 @@
     });
     const result = await waitForStatus('operation-status', id);
     if (!result?.ok) throw delegateError(result?.error, result);
+    clearControlCenterCache();
     return result;
   }
 
@@ -465,6 +501,7 @@
     });
     const result = await waitForStatus('operation-status', id);
     if (!result?.ok) throw delegateError(result?.error, result);
+    clearControlCenterCache();
     return result;
   }
 
@@ -488,6 +525,7 @@
     });
     const result = await waitForStatus('operation-status', id);
     if (!result?.ok) throw delegateError(result?.error, result);
+    clearControlCenterCache();
     return result;
   }
 
@@ -532,12 +570,16 @@
     return result;
   }
 
-  async function getControlCenterData() {
+  async function getControlCenterData(options = {}) {
     const token = coordinatorToken();
     if (!token) {
       const error = new Error('Sesja koordynatora wygasła. Zaloguj się ponownie.');
       error.code = 'unauthorized';
       throw error;
+    }
+    if (options.preferCache) {
+      const cached = readControlCenterCache();
+      if (cached) return cached;
     }
     const result = await jsonp('control-center-data', { token });
     if (!result?.ok) {
@@ -550,7 +592,15 @@
       error.code = result?.error || 'control_center_failed';
       throw error;
     }
-    return result;
+    if (!result.state?.initialized || !result.state?.payload) {
+      const error = new Error('Wspólne dane portalu nie są jeszcze gotowe.');
+      error.code = 'state_not_initialized';
+      throw error;
+    }
+    rememberState(result.state);
+    const bundle = { ...result, data: applyPayload(result.state.payload) };
+    rememberControlCenterData(bundle);
+    return bundle;
   }
 
   async function changeDelegateAccess(action, memberId) {
@@ -581,6 +631,7 @@
       error.code = result?.error || 'delegate_access_change_failed';
       throw error;
     }
+    clearControlCenterCache();
     return result;
   }
 
@@ -653,6 +704,7 @@
     initializeSharedState,
     hasCoordinatorToken,
     clearCoordinatorToken,
+    clearControlCenterCache,
     storageKey: CACHE_KEY
   };
 })();
