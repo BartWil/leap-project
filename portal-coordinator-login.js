@@ -32,7 +32,7 @@
 
     submit.disabled = true;
     submit.textContent = 'Sprawdzanie…';
-    status.textContent = '';
+    status.textContent = 'Łączenie z Google… przy wolniejszej odpowiedzi może to potrwać kilkadziesiąt sekund.';
     try {
       await window.LEAP_PORTAL_STORE.authenticateCoordinator(password.value);
       submit.textContent = 'Łączenie danych…';
