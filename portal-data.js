@@ -206,7 +206,7 @@
     {
       id: 'krystian', name: 'Krystian Walkowski', slug: 'krystian-walkowski',
       primaryRole: 'Research Assessor / Master’s Student (GAMNS)', secondaryRoles: ['Flexible Assessor'],
-      teamCategories: ['T0/W12 flexible assessment pool'], status: 'Onboarding',
+      teamCategories: ['T0/W12 flexible assessment pool'], status: 'Active',
       availability: ['Do ustalenia'], backupMemberId: 'student-1', supervisorId: 'karol',
       openTasksCount: 1, nextAssignmentId: null,
       certifications: ['Program szkoleniowy — w toku'],
