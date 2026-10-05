@@ -203,6 +203,17 @@
       notesPublic: 'Przydzielany do konkretnych stacji zgodnie z certyfikacją.',
       responsibilities: ['ROM', 'Antropometria', 'Wsparcie T0/W12'], exclusions: []
     },
+    {
+      id: 'krystian', name: 'Krystian Walkowski', slug: 'krystian-walkowski',
+      primaryRole: 'Research Assessor / Master’s Student (GAMNS)', secondaryRoles: ['Flexible Assessor'],
+      teamCategories: ['T0/W12 flexible assessment pool'], status: 'Onboarding',
+      availability: ['Do ustalenia'], backupMemberId: 'student-1', supervisorId: 'karol',
+      openTasksCount: 1, nextAssignmentId: null,
+      certifications: ['Program szkoleniowy — w toku'],
+      notesPublic: 'Magistrant GAMNS wspierający dni badawcze i pomiary po ukończeniu szkolenia.',
+      responsibilities: ['Wsparcie dni badawczych', 'Stacje T0/W12 po przeszkoleniu', 'CRF completeness', 'Pomiary T0 i W12'],
+      exclusions: ['Samodzielna praca przed potwierdzeniem przeszkolenia', 'Formalna kwalifikacja', 'Randomizacja', 'Safety escalation']
+    },
     ...[
       [1, 'Zuza Sroka', 'zuza-sroka'],
       [2, 'Zuzia Trzonkowska', 'zuzia-trzonkowska'],

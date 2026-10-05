@@ -180,6 +180,7 @@
     'student-2': studentGuide,
     'student-3': studentGuide,
     'student-4': studentGuide,
+    krystian: studentGuide,
     'data-qc-vacant': {
       inBrief: 'To obecnie nieobsadzona rola. Do czasu wyznaczenia osoby kierownik projektu pilnuje raportu braków, zapytań do danych, wersji dokumentów i gotowości bazy.',
       steps: [
