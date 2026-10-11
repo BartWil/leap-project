@@ -181,6 +181,17 @@
     'student-3': studentGuide,
     'student-4': studentGuide,
     krystian: studentGuide,
+    zosia: {
+      inBrief: 'Na razie nie masz przypisanych zadań badawczych. Jesteś członkinią zespołu w trakcie wdrożenia i nie wykonujesz samodzielnie pomiarów, dopóki rola oraz potrzebne szkolenie nie zostaną ustalone.',
+      steps: [
+        ['Sprawdzaj komunikaty projektu', 'Zaglądaj do portalu i wiadomości zespołu, aby wiedzieć, kiedy pojawi się propozycja szkolenia lub przyszłego zadania.'],
+        ['Poznaj organizację projektu', 'Zapoznaj się z harmonogramem, słowniczkiem i panelem treningowym. Na tym etapie uczysz się przebiegu wizyt, ale nie odpowiadasz jeszcze za żadną stację.'],
+        ['Nie rozpoczynaj samodzielnych pomiarów', 'Nie wykonuj i nie wpisuj wyników uczestników bez wyraźnego przydziału oraz potwierdzonego szkolenia do konkretnej procedury.'],
+        ['Potwierdź przyszły przydział', 'Gdy koordynator zaproponuje rolę, potwierdź zakres zadania, osobę szkolącą i moment, od którego możesz wykonywać je samodzielnie.']
+      ],
+      records: ['Na tym etapie nie wpisujesz wyników badawczych. Informacja o przyszłej roli i ukończonych szkoleniach zostanie dodana przez koordynatora.'],
+      done: ['Do czasu przydzielenia roli nie masz zadań badawczych do zamknięcia.', 'Po ustaleniu roli profil zostanie uzupełniony o konkretne obowiązki i wymagane szkolenia.']
+    },
     'data-qc-vacant': {
       inBrief: 'To obecnie nieobsadzona rola. Do czasu wyznaczenia osoby kierownik projektu pilnuje raportu braków, zapytań do danych, wersji dokumentów i gotowości bazy.',
       steps: [

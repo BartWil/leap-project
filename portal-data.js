@@ -214,6 +214,17 @@
       responsibilities: ['Wsparcie dni badawczych', 'Stacje T0/W12 po przeszkoleniu', 'CRF completeness', 'Pomiary T0 i W12'],
       exclusions: ['Samodzielna praca przed potwierdzeniem przeszkolenia', 'Formalna kwalifikacja', 'Randomizacja', 'Safety escalation']
     },
+    {
+      id: 'zosia', name: 'Zosia Nowak', slug: 'zosia-nowak',
+      primaryRole: 'Research Team Member / Second-Year Physiotherapy Student (GAMNS)', secondaryRoles: [],
+      teamCategories: ['Osoby w trakcie wdrożenia'], status: 'Onboarding',
+      availability: ['Do ustalenia'], backupMemberId: null, supervisorId: 'karol',
+      openTasksCount: 0, nextAssignmentId: null,
+      certifications: [],
+      notesPublic: 'Studentka II roku fizjoterapii w GAMNS. Obecnie bez przypisanych zadań badawczych.',
+      responsibilities: ['Obecnie bez przypisanych zadań badawczych'],
+      exclusions: ['Samodzielna praca przed ustaleniem roli i ukończeniem odpowiedniego szkolenia']
+    },
     ...[
       [1, 'Zuza Sroka', 'zuza-sroka'],
       [2, 'Zuzia Trzonkowska', 'zuzia-trzonkowska'],
