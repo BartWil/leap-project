@@ -225,6 +225,17 @@
       responsibilities: ['Obecnie bez przypisanych zadań badawczych'],
       exclusions: ['Samodzielna praca przed ustaleniem roli i ukończeniem odpowiedniego szkolenia']
     },
+    {
+      id: 'emilia', name: 'Emilia Skrzypkowska', slug: 'emilia-skrzypkowska',
+      primaryRole: 'Research Team Member / Fifth-Year Physiotherapy Student (GAMNS)', secondaryRoles: [],
+      teamCategories: ['Osoby w trakcie wdrożenia'], status: 'Onboarding',
+      availability: ['Do ustalenia'], backupMemberId: null, supervisorId: 'karol',
+      openTasksCount: 0, nextAssignmentId: null,
+      certifications: [],
+      notesPublic: 'Studentka V roku fizjoterapii w GAMNS. Obecnie bez przypisanych zadań badawczych.',
+      responsibilities: ['Obecnie bez przypisanych zadań badawczych'],
+      exclusions: ['Samodzielna praca przed ustaleniem roli i ukończeniem odpowiedniego szkolenia']
+    },
     ...[
       [1, 'Zuza Sroka', 'zuza-sroka'],
       [2, 'Zuzia Trzonkowska', 'zuzia-trzonkowska'],
