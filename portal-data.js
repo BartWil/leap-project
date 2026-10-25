@@ -247,6 +247,17 @@
       responsibilities: ['Obecnie bez przypisanych zadań badawczych'],
       exclusions: ['Samodzielna praca przed ustaleniem roli i ukończeniem odpowiedniego szkolenia']
     },
+    {
+      id: 'oskar', name: 'Oskar Nikadon', slug: 'oskar-nikadon',
+      primaryRole: 'Research Team Member / Second-Year Physiotherapy Student (GAMNS)', secondaryRoles: [],
+      teamCategories: ['Osoby w trakcie wdrożenia'], status: 'Onboarding',
+      availability: ['Do ustalenia'], backupMemberId: null, supervisorId: 'karol',
+      openTasksCount: 0, nextAssignmentId: null,
+      certifications: [],
+      notesPublic: 'Student II roku fizjoterapii w GAMNS. Uczy się pracy w projekcie i obecnie nie ma przypisanych zadań badawczych.',
+      responsibilities: ['Obecnie bez przypisanych zadań badawczych — etap nauki i wdrożenia'],
+      exclusions: ['Samodzielna praca przed ustaleniem roli i ukończeniem odpowiedniego szkolenia']
+    },
     ...[
       [1, 'Zuza Sroka', 'zuza-sroka'],
       [2, 'Zuzia Trzonkowska', 'zuzia-trzonkowska'],
